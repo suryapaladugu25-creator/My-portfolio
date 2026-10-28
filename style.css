@@ -1344,3 +1344,300 @@ body {
   background: linear-gradient(180deg, #f5c842, #e8a020);
   border-radius: 9999px;
 }
+
+/* ==========================================================================
+   ✨ CINEMATIC GOLD & BLACK PAGE ENTRY — Animations & Splash Screen
+   ========================================================================== */
+
+/* ── 1. Full-screen intro splash overlay ── */
+#intro-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #06060a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  pointer-events: none; /* allow click-through once fading */
+  overflow: hidden;
+}
+
+/* Splash disappears after animation completes */
+#intro-splash.done {
+  display: none;
+}
+
+/* Gold shimmer lines that sweep across the splash */
+#intro-splash::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      -55deg,
+      transparent 0px,
+      transparent 58px,
+      rgba(245,200,66,0.035) 59px,
+      rgba(245,200,66,0.035) 60px
+    );
+  animation: sweep-lines 3s ease forwards;
+}
+
+@keyframes sweep-lines {
+  0%   { opacity:0; transform:translateX(-60px); }
+  30%  { opacity:1; }
+  100% { opacity:0; transform:translateX(60px); }
+}
+
+/* Central logo mark in splash */
+.splash-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  animation: splash-rise 0.9s cubic-bezier(0.16,1,0.3,1) 0.3s both;
+}
+
+@keyframes splash-rise {
+  0%   { opacity:0; transform:translateY(40px) scale(0.85); }
+  100% { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.splash-monogram {
+  font-family: var(--font-mono);
+  font-size: 4.5rem;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  background: linear-gradient(135deg, #f5c842 0%, #fde68a 35%, #e8a020 65%, #f5c842 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gold-shimmer 2.5s linear infinite, splash-rise 0.9s cubic-bezier(0.16,1,0.3,1) 0.3s both;
+  filter: drop-shadow(0 0 30px rgba(245,200,66,0.7));
+  line-height: 1;
+}
+
+@keyframes gold-shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.splash-tagline {
+  font-size: .95rem;
+  font-weight: 600;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: rgba(245,200,66,0.65);
+  animation: splash-rise 0.9s cubic-bezier(0.16,1,0.3,1) 0.55s both;
+}
+
+/* Gold progress bar beneath splash */
+.splash-bar-wrap {
+  width: 200px;
+  height: 2px;
+  background: rgba(245,200,66,0.12);
+  border-radius: 9999px;
+  overflow: hidden;
+  animation: splash-rise 0.9s cubic-bezier(0.16,1,0.3,1) 0.7s both;
+}
+
+.splash-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #f5c842, #fde68a, #e8a020);
+  border-radius: 9999px;
+  box-shadow: 0 0 12px rgba(245,200,66,0.9);
+  animation: fill-bar 1.6s cubic-bezier(0.4,0,0.2,1) 0.8s forwards;
+}
+
+@keyframes fill-bar {
+  0%   { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* Splash exit — whole overlay fades & scales out */
+#intro-splash {
+  animation: splash-exit 0.7s cubic-bezier(0.4,0,0.2,1) 2.6s both;
+}
+
+@keyframes splash-exit {
+  0%   { opacity:1; transform:scale(1); }
+  100% { opacity:0; transform:scale(1.04); pointer-events:none; }
+}
+
+/* ── 2. Floating gold particle sparkles in splash ── */
+.spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f5c842;
+  box-shadow: 0 0 8px #f5c842, 0 0 16px rgba(245,200,66,0.6);
+  animation: float-spark var(--dur, 4s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+@keyframes float-spark {
+  0%   { transform: translate(0, 0) scale(1);   opacity: .9; }
+  100% { transform: translate(var(--tx, 30px), var(--ty, -40px)) scale(0.3); opacity: 0; }
+}
+
+/* ── 3. Body-level entrance: content slides in after splash exits ── */
+body {
+  animation: body-enter 0.8s cubic-bezier(0.16,1,0.3,1) 2.5s both;
+}
+
+@keyframes body-enter {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 4. Hero headline — letter-by-letter shimmer reveal ── */
+.hero-headline {
+  animation: text-in 1s cubic-bezier(0.16,1,0.3,1) 2.8s both;
+}
+
+@keyframes text-in {
+  0%   { opacity:0; transform:translateY(24px); filter:blur(4px); }
+  100% { opacity:1; transform:translateY(0);    filter:blur(0); }
+}
+
+.hero-sub {
+  animation: text-in 1s cubic-bezier(0.16,1,0.3,1) 3.0s both;
+}
+.hero-ctas {
+  animation: text-in 1s cubic-bezier(0.16,1,0.3,1) 3.15s both;
+}
+.hero-socials {
+  animation: text-in 1s cubic-bezier(0.16,1,0.3,1) 3.3s both;
+}
+.status-pill {
+  animation: text-in 1s cubic-bezier(0.16,1,0.3,1) 2.65s both;
+}
+.profile-wrapper {
+  animation: profile-in 1.2s cubic-bezier(0.16,1,0.3,1) 3.0s both;
+}
+
+@keyframes profile-in {
+  0%   { opacity:0; transform:translateX(50px) scale(0.92); }
+  100% { opacity:1; transform:translateX(0)    scale(1); }
+}
+
+/* ── 5. Section headers animate on scroll (JS adds .in-view) ── */
+.section-label {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.section-label.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── 6. Golden glow pulse on profile card ── */
+.profile-glow {
+  animation: glow-pulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes glow-pulse {
+  0%   { opacity:.20; transform:translate(-50%,-50%) scale(0.92); filter:blur(65px); }
+  100% { opacity:.40; transform:translate(-50%,-50%) scale(1.08); filter:blur(80px); }
+}
+
+/* ── 7. Nav brand gold shimmer on hover ── */
+.nav-brand:hover .brand-code {
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  box-shadow: 0 0 16px var(--accent-glow);
+  border-color: var(--border-hov);
+  transition: all 0.3s ease;
+}
+
+/* ── 8. Cards — gold left-border reveal on hover ── */
+.mini-stat-card::after,
+.skill-cat::after,
+.beyond-card::after,
+.os-card::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 10%; bottom: 10%;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent-grad);
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: opacity var(--t-base), transform var(--t-base);
+}
+.mini-stat-card, .skill-cat, .beyond-card, .os-card { overflow: hidden; }
+.mini-stat-card:hover::after,
+.skill-cat:hover::after,
+.beyond-card:hover::after,
+.os-card:hover::after {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* ── 9. Scrolling gold ticker line (decorative section separator) ── */
+.gold-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(245,200,66,0.4) 30%, rgba(245,200,66,0.8) 50%, rgba(245,200,66,0.4) 70%, transparent 100%);
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+.gold-divider::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #fde68a 50%, transparent 100%);
+  width: 40%;
+  animation: scan-line 3s ease-in-out infinite;
+}
+@keyframes scan-line {
+  0%   { transform: translateX(-200%); opacity:0.8; }
+  100% { transform: translateX(400%);  opacity:0.8; }
+}
+
+/* ── 10. Tag accent (section pill) — gold tint ── */
+.tag {
+  background: linear-gradient(135deg, rgba(245,200,66,0.12) 0%, rgba(232,160,32,0.08) 100%);
+  border-color: rgba(245,200,66,0.22);
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(245,200,66,0.4);
+}
+
+/* ── 11. Hacktoberfest glow ring — golden override ── */
+.hf-badge-ring {
+  background: linear-gradient(135deg, #f5c842 0%, #e8a020 50%, #fde68a 100%);
+  box-shadow: 0 0 40px rgba(245,200,66,0.6), 0 0 80px rgba(245,200,66,0.2);
+}
+
+/* ── 12. Back-to-top button — golden pulse ── */
+.back-top-btn {
+  animation: btn-pulse 3s ease-in-out infinite;
+}
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 4px 14px var(--accent-glow); }
+  50%       { box-shadow: 0 4px 28px rgba(245,200,66,0.65), 0 0 0 6px rgba(245,200,66,0.08); }
+}
+
+/* ── 13. Selection ── */
+::selection {
+  background: rgba(245,200,66,0.35);
+  color: #f5c842;
+}
+
+/* ── 14. Scrollbar — minimal gold ── */
+::-webkit-scrollbar        { width: 5px; }
+::-webkit-scrollbar-track  { background: var(--bg-base); }
+::-webkit-scrollbar-thumb  {
+  background: linear-gradient(180deg, #f5c842, #e8a020);
+  border-radius: 9999px;
+}
+

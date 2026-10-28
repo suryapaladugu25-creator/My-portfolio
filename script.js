@@ -1,282 +1,310 @@
 /**
- * Surya - Portfolio Interactive Script
+ * ============================================================
+ * SURYA — Portfolio JavaScript
  * Features:
- *  - Theme Toggle (Dark / Light Mode with localStorage persistence)
- *  - Mobile Hamburger Menu Toggle & Accessibility
- *  - Sticky Navbar Shadow & Active Section ScrollSpy
- *  - Smooth Scrolling for all in-page links
- *  - Project Category Filter Tabs
- *  - Client-Side Contact Form Validation & Mock Submission
- *  - Back-to-Top Button
- *  - Dynamic Copyright Year
+ *  0. ✨ Cinematic gold splash screen + particle sparkles
+ *  1. Theme toggle (dark / light) with localStorage persistence
+ *  2. Mobile hamburger menu + accessibility
+ *  3. Sticky nav: shadow on scroll + active-link ScrollSpy
+ *  4. Smooth scrolling for all in-page anchor links
+ *  5. Project category filter
+ *  6. Contact form: client-side validation + mock submission
+ *  7. Back-to-top button
+ *  8. Dynamic copyright year
+ *  9. Scroll-reveal animation for cards / sections
+ * 10. Section header in-view trigger
+ * ============================================================
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // --------------------------------------------------------------------------
-  // 1. Theme Toggle (Dark / Light Mode)
-  // --------------------------------------------------------------------------
-  const themeToggleBtn = document.getElementById('theme-toggle');
-  const htmlRoot = document.documentElement;
 
-  // Check saved theme or default to dark
-  const savedTheme = localStorage.getItem('portfolio-theme') || 'dark';
-  htmlRoot.setAttribute('data-theme', savedTheme);
+  /* ──────────────────────────────────────────────────────────
+     0. ✨ CINEMATIC SPLASH SCREEN + GOLD SPARKLES
+  ────────────────────────────────────────────────────────── */
+  const splash = document.getElementById('intro-splash');
+  const sparkContainer = document.getElementById('spark-container');
 
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-      const currentTheme = htmlRoot.getAttribute('data-theme');
-      const targetTheme = currentTheme === 'light' ? 'dark' : 'light';
+  // Generate floating gold particle sparkles
+  if (sparkContainer) {
+    const sparkCount = 28;
+    for (let i = 0; i < sparkCount; i++) {
+      const spark = document.createElement('div');
+      spark.classList.add('spark');
 
-      htmlRoot.setAttribute('data-theme', targetTheme);
-      localStorage.setItem('portfolio-theme', targetTheme);
-    });
-  }
+      const x  = Math.random() * 100;  // % left
+      const y  = Math.random() * 100;  // % top
+      const tx = (Math.random() - 0.5) * 180;  // x travel
+      const ty = -(Math.random() * 200 + 60);   // y travel (up)
+      const dur   = (Math.random() * 2 + 2).toFixed(2) + 's';
+      const delay = (Math.random() * 2.2).toFixed(2) + 's';
+      const size  = Math.random() * 4 + 2;
 
-  // --------------------------------------------------------------------------
-  // 2. Mobile Hamburger Menu Toggle
-  // --------------------------------------------------------------------------
-  const hamburgerBtn = document.getElementById('hamburger-btn');
-  const navMenu = document.getElementById('nav-menu');
-  const navLinks = document.querySelectorAll('.nav-link');
-
-  if (hamburgerBtn && navMenu) {
-    hamburgerBtn.addEventListener('click', () => {
-      const isExpanded = hamburgerBtn.getAttribute('aria-expanded') === 'true';
-      hamburgerBtn.setAttribute('aria-expanded', !isExpanded);
-      hamburgerBtn.classList.toggle('active');
-      navMenu.classList.toggle('open');
-    });
-
-    // Close menu when a navigation link is clicked
-    navLinks.forEach((link) => {
-      link.addEventListener('click', () => {
-        hamburgerBtn.classList.remove('active');
-        hamburgerBtn.setAttribute('aria-expanded', 'false');
-        navMenu.classList.remove('open');
-      });
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (event) => {
-      if (!navMenu.contains(event.target) && !hamburgerBtn.contains(event.target)) {
-        hamburgerBtn.classList.remove('active');
-        hamburgerBtn.setAttribute('aria-expanded', 'false');
-        navMenu.classList.remove('open');
-      }
-    });
-  }
-
-  // --------------------------------------------------------------------------
-  // 3. Sticky Navbar Shadow & Active Link ScrollSpy
-  // --------------------------------------------------------------------------
-  const header = document.getElementById('header');
-  const sections = document.querySelectorAll('section[id]');
-
-  const handleScroll = () => {
-    const scrollY = window.scrollY;
-
-    // Sticky header shadow
-    if (header) {
-      if (scrollY > 30) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
+      spark.style.cssText = `
+        left:${x}%;
+        top:${y}%;
+        width:${size}px;
+        height:${size}px;
+        --tx:${tx}px;
+        --ty:${ty}px;
+        --dur:${dur};
+        --delay:${delay};
+        opacity:${Math.random() * 0.6 + 0.4};
+      `;
+      sparkContainer.appendChild(spark);
     }
+  }
 
-    // ScrollSpy: Highlight active section nav link
-    const scrollPosition = scrollY + 120;
-    sections.forEach((section) => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.offsetHeight;
-      const sectionId = section.getAttribute('id');
-      const matchingLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+  // Mark splash as done after CSS animation finishes (3.3s exit)
+  if (splash) {
+    setTimeout(() => {
+      splash.classList.add('done');
+      document.body.style.animation = 'none'; // prevent re-trigger
+    }, 3400);
+  }
 
-      if (matchingLink) {
-        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-          matchingLink.classList.add('active');
-        } else {
-          matchingLink.classList.remove('active');
-        }
-      }
+
+  /* ──────────────────────────────────────────────────────────
+     1. THEME TOGGLE
+  ────────────────────────────────────────────────────────── */
+  const html      = document.documentElement;
+  const themeBtn  = document.getElementById('theme-btn');
+  const themeIcon = document.getElementById('theme-icon');
+
+  const applyTheme = (theme) => {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('surya-theme', theme);
+    if (themeIcon) {
+      themeIcon.className = theme === 'dark'
+        ? 'fa-solid fa-moon'
+        : 'fa-solid fa-sun';
+    }
+  };
+
+  const saved = localStorage.getItem('surya-theme');
+  const system = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  applyTheme(saved || system);
+
+  themeBtn?.addEventListener('click', () => {
+    applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+
+  /* ──────────────────────────────────────────────────────────
+     2. MOBILE HAMBURGER MENU
+  ────────────────────────────────────────────────────────── */
+  const hamburger = document.getElementById('hamburger');
+  const navLinks  = document.getElementById('nav-links');
+
+  const closeMenu = () => {
+    hamburger?.classList.remove('open');
+    navLinks?.classList.remove('open');
+    hamburger?.setAttribute('aria-expanded', 'false');
+  };
+
+  hamburger?.addEventListener('click', () => {
+    const isOpen = navLinks?.classList.toggle('open');
+    hamburger.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  navLinks?.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!navLinks?.contains(e.target) && !hamburger?.contains(e.target)) closeMenu();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+
+  /* ──────────────────────────────────────────────────────────
+     3. STICKY NAV: shadow + ScrollSpy
+  ────────────────────────────────────────────────────────── */
+  const header   = document.getElementById('site-header');
+  const sections = document.querySelectorAll('section[id]');
+  const allLinks = document.querySelectorAll('.nav-link');
+
+  const onScroll = () => {
+    const y = window.scrollY;
+    header?.classList.toggle('scrolled', y > 20);
+
+    const offset = 72 + 80;
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY + offset >= sec.offsetTop) current = sec.id;
+    });
+    allLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
     });
   };
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  handleScroll(); // Trigger initial check on load
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
-  // --------------------------------------------------------------------------
-  // 4. Smooth Scrolling for In-Page Anchors
-  // --------------------------------------------------------------------------
-  const internalLinks = document.querySelectorAll('a[href^="#"]');
-  internalLinks.forEach((anchor) => {
+
+  /* ──────────────────────────────────────────────────────────
+     4. SMOOTH SCROLLING
+  ────────────────────────────────────────────────────────── */
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
-      const targetId = anchor.getAttribute('href');
-      if (targetId && targetId !== '#') {
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          e.preventDefault();
-          const headerOffset = 70;
-          const elementPosition = targetElement.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth',
-          });
-        }
-      }
+      const target = document.querySelector(anchor.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      const top = target.getBoundingClientRect().top + window.pageYOffset - 72;
+      window.scrollTo({ top, behavior: 'smooth' });
     });
   });
 
-  // --------------------------------------------------------------------------
-  // 5. Project Filter Tabs
-  // --------------------------------------------------------------------------
-  const filterBtns = document.querySelectorAll('.filter-btn');
+
+  /* ──────────────────────────────────────────────────────────
+     5. PROJECT FILTER
+  ────────────────────────────────────────────────────────── */
+  const filterBtns   = document.querySelectorAll('.filter-btn');
   const projectCards = document.querySelectorAll('.project-card');
 
-  filterBtns.forEach((btn) => {
+  filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      // Toggle active button style & ARIA state
-      filterBtns.forEach((b) => {
-        b.classList.remove('active');
-        b.setAttribute('aria-selected', 'false');
-      });
+      filterBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
       btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
+      btn.setAttribute('aria-selected','true');
 
-      const filterValue = btn.getAttribute('data-filter');
-
-      // Filter projects with smooth visibility transition
-      projectCards.forEach((card) => {
-        const cardCategory = card.getAttribute('data-category');
-
-        if (filterValue === 'all' || cardCategory === filterValue) {
-          card.style.display = 'flex';
-          card.style.animation = 'fadeInCard 0.4s ease forwards';
-        } else {
-          card.style.display = 'none';
-        }
+      const filter = btn.dataset.filter;
+      projectCards.forEach(card => {
+        const match = filter === 'all' || card.dataset.category === filter;
+        card.style.display   = match ? 'flex' : 'none';
+        card.style.animation = match ? 'card-in .35s ease forwards' : '';
       });
     });
   });
 
-  // --------------------------------------------------------------------------
-  // 6. Contact Form Validation & Mock Submit Handler
-  // --------------------------------------------------------------------------
-  const contactForm = document.getElementById('contact-form');
-  const nameInput = document.getElementById('name');
-  const emailInput = document.getElementById('email');
-  const messageInput = document.getElementById('message');
-  const submitBtn = document.getElementById('submit-btn');
-  const btnText = submitBtn?.querySelector('.btn-text');
-  const btnSendIcon = submitBtn?.querySelector('.btn-send-icon');
-  const btnSpinner = submitBtn?.querySelector('.btn-spinner');
-  const formToast = document.getElementById('form-toast');
 
-  // Simple Email Regex
-  const isValidEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  /* ──────────────────────────────────────────────────────────
+     6. CONTACT FORM — validation + mock submit
+  ────────────────────────────────────────────────────────── */
+  const form        = document.getElementById('contact-form');
+  const nameInput   = document.getElementById('cf-name');
+  const emailInput  = document.getElementById('cf-email');
+  const msgInput    = document.getElementById('cf-message');
+  const submitBtn   = document.getElementById('cf-submit');
+  const submitLabel = document.getElementById('submit-label');
+  const submitIcon  = document.getElementById('submit-icon');
+  const submitSpin  = document.getElementById('submit-spin');
+  const toast       = document.getElementById('form-toast');
+
+  const isEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+  const validate = (input, condition) => {
+    input?.closest('.form-field')?.classList.toggle('has-err', !condition);
+    return condition;
   };
 
-  const validateField = (input, condition) => {
-    const parent = input.closest('.form-group');
-    if (!condition) {
-      parent.classList.add('has-error');
-      return false;
-    } else {
-      parent.classList.remove('has-error');
-      return true;
-    }
-  };
-
-  // Realtime clear of error when user types
-  [nameInput, emailInput, messageInput].forEach((input) => {
-    if (input) {
-      input.addEventListener('input', () => {
-        input.closest('.form-group').classList.remove('has-error');
-        if (formToast) formToast.style.display = 'none';
-      });
-    }
+  [nameInput, emailInput, msgInput].forEach(inp => {
+    inp?.addEventListener('input', () => {
+      inp.closest('.form-field')?.classList.remove('has-err');
+      if (toast) toast.style.display = 'none';
+    });
   });
 
-  if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      const isNameValid = validateField(nameInput, nameInput.value.trim().length > 1);
-      const isEmailValid = validateField(emailInput, isValidEmail(emailInput.value.trim()));
-      const isMessageValid = validateField(messageInput, messageInput.value.trim().length >= 10);
+    const okName  = validate(nameInput,  (nameInput?.value.trim().length  ?? 0) > 1);
+    const okEmail = validate(emailInput, isEmail(emailInput?.value.trim() ?? ''));
+    const okMsg   = validate(msgInput,   (msgInput?.value.trim().length   ?? 0) >= 10);
 
-      if (!isNameValid || !isEmailValid || !isMessageValid) {
-        return; // Validation failed
+    if (!okName || !okEmail || !okMsg) return;
+
+    submitBtn.disabled = true;
+    if (submitLabel) submitLabel.textContent = 'Sending...';
+    if (submitIcon)  submitIcon.style.display = 'none';
+    if (submitSpin)  submitSpin.style.display = 'inline-block';
+
+    await new Promise(res => setTimeout(res, 1400));
+
+    submitBtn.disabled = false;
+    if (submitLabel) submitLabel.textContent = 'Send Message';
+    if (submitIcon)  submitIcon.style.display = 'inline-block';
+    if (submitSpin)  submitSpin.style.display = 'none';
+
+    if (toast) {
+      toast.className  = 'form-toast ok';
+      toast.textContent = '🏆 Message sent! I\'ll get back to you soon.';
+    }
+    form.reset();
+    setTimeout(() => { if (toast) toast.style.display = 'none'; }, 6000);
+  });
+
+
+  /* ──────────────────────────────────────────────────────────
+     7. BACK-TO-TOP
+  ────────────────────────────────────────────────────────── */
+  document.getElementById('back-top')?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+
+  /* ──────────────────────────────────────────────────────────
+     8. DYNAMIC YEAR
+  ────────────────────────────────────────────────────────── */
+  const yrEl = document.getElementById('yr');
+  if (yrEl) yrEl.textContent = new Date().getFullYear();
+
+
+  /* ──────────────────────────────────────────────────────────
+     9. SCROLL-REVEAL for cards (IntersectionObserver)
+  ────────────────────────────────────────────────────────── */
+  const revealCSS = `
+    @keyframes card-in {
+      from { opacity:0; transform:translateY(22px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .rv-hidden { opacity:0; transform:translateY(22px); transition:none; }
+    .rv-show   { animation:card-in .6s cubic-bezier(.16,1,.3,1) forwards; }
+  `;
+  const styleTag = document.createElement('style');
+  styleTag.textContent = revealCSS;
+  document.head.appendChild(styleTag);
+
+  const revealTargets = document.querySelectorAll(
+    '.mini-stat-card, .skill-cat, .project-card, .beyond-card, .os-card, .hf-spotlight, .cinfo-card'
+  );
+
+  let idx = 0;
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        el.style.animationDelay = `${(idx % 5) * 70}ms`;
+        el.classList.remove('rv-hidden');
+        el.classList.add('rv-show');
+        idx++;
+        revealObserver.unobserve(el);
       }
+    });
+  }, { threshold: 0.10, rootMargin: '0px 0px -36px 0px' });
 
-      // Enter Loading State
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        if (btnText) btnText.textContent = 'Sending Message...';
-        if (btnSendIcon) btnSendIcon.style.display = 'none';
-        if (btnSpinner) btnSpinner.style.display = 'inline-block';
+  revealTargets.forEach(el => {
+    el.classList.add('rv-hidden');
+    revealObserver.observe(el);
+  });
+
+
+  /* ──────────────────────────────────────────────────────────
+     10. SECTION HEADERS — fade-in on scroll
+  ────────────────────────────────────────────────────────── */
+  const sectionLabels = document.querySelectorAll('.section-label');
+  const labelObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        labelObserver.unobserve(entry.target);
       }
-
-      // Mock sending network request
-      setTimeout(() => {
-        // Reset Button
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          if (btnText) btnText.textContent = 'Send Message';
-          if (btnSendIcon) btnSendIcon.style.display = 'inline-block';
-          if (btnSpinner) btnSpinner.style.display = 'none';
-        }
-
-        // Show Success Toast
-        if (formToast) {
-          formToast.className = 'form-toast success';
-          formToast.textContent = '🎉 Thank you! Your message has been sent successfully. I will get back to you soon.';
-          formToast.style.display = 'block';
-        }
-
-        // Reset form inputs
-        contactForm.reset();
-
-        // Hide toast message after 6 seconds
-        setTimeout(() => {
-          if (formToast) formToast.style.display = 'none';
-        }, 6000);
-      }, 1200);
     });
-  }
+  }, { threshold: 0.2 });
 
-  // --------------------------------------------------------------------------
-  // 7. Back-to-Top Button
-  // --------------------------------------------------------------------------
-  const backToTopBtn = document.getElementById('back-to-top');
-  if (backToTopBtn) {
-    backToTopBtn.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    });
-  }
+  sectionLabels.forEach(el => labelObserver.observe(el));
 
-  // --------------------------------------------------------------------------
-  // 8. Dynamic Copyright Year
-  // --------------------------------------------------------------------------
-  const yearElement = document.getElementById('current-year');
-  if (yearElement) {
-    yearElement.textContent = new Date().getFullYear();
-  }
 });
-
-// Dynamic keyframe animation for filtered cards
-const styleTag = document.createElement('style');
-styleTag.innerHTML = `
-  @keyframes fadeInCard {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-`;
-document.head.appendChild(styleTag);
-

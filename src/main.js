@@ -19,6 +19,7 @@ import { createLights, updateLights } from './core/Lights.js';
 import { PostFX }                from './core/PostProcessing.js';
 import { TreeGenerator }         from './tree/TreeGenerator.js';
 import { LeavesSystem }          from './tree/Leaves.js';
+import { EnvironmentFX }         from './particles/Environment.js';
 import { SectionsManager }       from './sections/Sections.js';
 
 const device = new DeviceDetect();
@@ -74,7 +75,11 @@ async function init3D() {
 
   // Instanced multi-toned green foliage canopy
   const leaves = new LeavesSystem(scene, tree, device);
-  loading.setProgress(85);
+  loading.setProgress(75);
+
+  // Storybook environment: rolling hills, stone path, swaying grass, butterflies, god rays
+  const env = new EnvironmentFX(scene, device);
+  loading.setProgress(88);
 
   // Sections and interaction manager
   const sections = new SectionsManager(scene, camCtrl, tree);
@@ -131,6 +136,7 @@ async function init3D() {
 
     tree.update(t);
     leaves.update(t);
+    env.update(t, dt);
     camCtrl.update(dt, mouse);
     updateSceneClouds(scene.userData.clouds, dt);
     updateLights(lights, t);

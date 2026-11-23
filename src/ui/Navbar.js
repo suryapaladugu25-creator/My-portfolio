@@ -1,33 +1,29 @@
 /**
- * Navbar.js — Hooks nav links to CameraController.flyToSection()
- * Most navbar logic (hamburger, shadow, theme) is handled in initUIOnly() in main.js.
+ * Navbar.js — Wires navigation items directly to open tree section panels
  */
-
 export class NavbarUI {
-  constructor(camCtrl) {
-    this.camCtrl = camCtrl;
+  constructor(sections) {
+    this.sections = sections;
 
-    // Expose flyTo globally so data-fly buttons and other modules can use it
-    window.__camFlyTo = (section) => camCtrl.flyToSection(section);
-
-    // Wire nav links to camera fly
-    document.querySelectorAll('.nb-link[href^="#"]').forEach(link => {
+    document.querySelectorAll('.nb-link[data-section]').forEach(link => {
       link.addEventListener('click', (e) => {
-        const hash = link.getAttribute('href').slice(1); // e.g. "about" from "#about"
-        if (hash && camCtrl.flyToSection) {
-          e.preventDefault();
-          camCtrl.flyToSection(hash);
+        e.preventDefault();
+        const sectionId = link.dataset.section;
+        if (sectionId) {
+          sections.openSection(sectionId);
         }
       });
     });
 
-    // Resume CTA button
+    const brand = document.getElementById('nb-brand');
+    brand?.addEventListener('click', (e) => {
+      e.preventDefault();
+      sections.closeActivePanel();
+    });
+
     const resumeBtn = document.getElementById('resume-btn');
-    resumeBtn?.addEventListener('click', () => {
-      // Open resume PDF or link (placeholder)
-      const resumeUrl = 'assets/resume.pdf';
-      window.open(resumeUrl, '_blank');
+    resumeBtn?.addEventListener('click', (e) => {
+      // Keep existing resume action
     });
   }
 }
-

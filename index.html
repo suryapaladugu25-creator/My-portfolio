@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,17 +15,13 @@
 <body>
 
   <!-- ══════════════════════════════════════════
-       LOADING SCREEN — Gold Seed Sprout
+       LOADING SCREEN — Natural Sprout
   ══════════════════════════════════════════ -->
   <div id="loading-screen">
     <div class="ls-seed-wrap">
       <div class="ls-seed" id="ls-seed">
         <div class="ls-seed-glow"></div>
         <div class="ls-seed-core"></div>
-        <div class="ls-seed-rays">
-          <span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span>
-        </div>
       </div>
     </div>
     <div class="ls-pct"><span id="ls-pct-num">0</span><span class="ls-pct-sign">%</span></div>
@@ -46,7 +42,7 @@
   <canvas id="three-canvas"></canvas>
 
   <!-- ══════════════════════════════════════════
-       STICKY NAV (always on top of canvas)
+       STICKY NAV
   ══════════════════════════════════════════ -->
   <header id="navbar" class="navbar">
     <div class="nb-inner">
@@ -68,14 +64,14 @@
         <button id="sound-btn" class="nb-icon-btn" aria-label="Toggle ambient sound" title="Sound (Off)">
           <i class="fa-solid fa-volume-xmark"></i>
         </button>
-        <button id="theme-btn" class="nb-icon-btn" aria-label="Toggle light/dark theme">
+        <button id="theme-btn" class="nb-icon-btn" aria-label="Toggle daytime/night theme">
           <i class="fa-solid fa-moon" id="theme-icon"></i>
         </button>
         <button id="calm-mode-btn" class="nb-icon-btn" aria-label="Toggle Calm Mode" title="Calm Mode (Less Motion)">
           <i class="fa-solid fa-feather"></i>
         </button>
-        <a href="#contact-section" class="nb-resume-btn">
-          <i class="fa-solid fa-file-arrow-down"></i> Resume
+        <a href="#contact-section" class="nb-resume-btn" id="resume-btn">
+          <i class="fa-solid fa-file-arrow-down"></i> <span>Resume</span>
         </a>
         <button id="hamburger" class="nb-hamburger nb-icon-btn" aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
@@ -85,18 +81,27 @@
   </header>
 
   <!-- ══════════════════════════════════════════
-       SCROLL-DRIVEN CONTENT CARDS (overlay on canvas)
+       CLICK-THE-TREE EXPLORATION HINT
+  ══════════════════════════════════════════ -->
+  <div id="tree-explore-hint" role="status">
+    <i class="fa-solid fa-arrow-pointer"></i>
+    <span>Click the tree to explore sections</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       CONTENT CARDS (Beside the tree)
   ══════════════════════════════════════════ -->
   <div id="cards-overlay">
 
     <!-- HERO -->
     <div class="card-panel" id="hero-section" data-panel="hero">
       <div class="panel-content">
+        <button class="panel-close-btn" data-close aria-label="Close panel"><i class="fa-solid fa-xmark"></i></button>
         <div class="status-pill"><span class="pulse-dot"></span> Open to Internships &amp; Collabs</div>
-        <h1 class="panel-h1">Engineering the future,<br><span class="gold-text">one commit at a time.</span></h1>
+        <h1 class="panel-h1">Engineering the future,<br><span class="accent-text">one commit at a time.</span></h1>
         <p class="panel-sub">B.Tech CS student at <strong>Newton School of Technology</strong> — crafting clean systems by day, shredding guitar strings by night, and chasing horizons on two wheels at dawn.</p>
         <div class="panel-ctas">
-          <button class="btn-gold" data-fly="projects">Explore Work <i class="fa-solid fa-arrow-right"></i></button>
+          <button class="btn-blue" data-fly="projects">Explore Work <i class="fa-solid fa-arrow-right"></i></button>
           <button class="btn-outline" data-fly="beyond">View Achievements <i class="fa-solid fa-medal"></i></button>
         </div>
         <div class="hero-socials">
@@ -104,13 +109,13 @@
           <a href="https://linkedin.com" target="_blank" class="social-chip" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i><span>LinkedIn</span></a>
           <a href="mailto:surya@example.com" class="social-chip" aria-label="Email"><i class="fa-regular fa-envelope"></i><span>Email</span></a>
         </div>
-        <p class="scroll-hint"><i class="fa-solid fa-angles-down"></i> Scroll to grow the tree</p>
       </div>
     </div>
 
     <!-- ABOUT -->
     <div class="card-panel" id="about-section" data-panel="about">
       <div class="panel-content panel-right">
+        <button class="panel-close-btn" data-close aria-label="Close panel"><i class="fa-solid fa-xmark"></i></button>
         <span class="panel-tag">Who I Am</span>
         <h2 class="panel-h2">More Than a Developer</h2>
         <p>I'm Surya — a Computer Science undergraduate at <strong>Newton School of Technology</strong>, building systems where precision meets performance.</p>
@@ -128,6 +133,7 @@
     <!-- SKILLS -->
     <div class="card-panel" id="skills-section" data-panel="skills">
       <div class="panel-content panel-left">
+        <button class="panel-close-btn" data-close aria-label="Close panel"><i class="fa-solid fa-xmark"></i></button>
         <span class="panel-tag">Technical Arsenal</span>
         <h2 class="panel-h2">Skills &amp; Tech Stack</h2>
         <div class="skills-grid">
@@ -166,9 +172,10 @@
     <!-- PROJECTS -->
     <div class="card-panel" id="projects-section" data-panel="projects">
       <div class="panel-content">
+        <button class="panel-close-btn" data-close aria-label="Close panel"><i class="fa-solid fa-xmark"></i></button>
         <span class="panel-tag">Built Things</span>
         <h2 class="panel-h2">Featured Projects</h2>
-        <p class="panel-sub-sm">Click a glowing lantern in the tree to explore — or browse below.</p>
+        <p class="panel-sub-sm">Selected systems and open-source applications.</p>
         <div class="projects-grid">
           <div class="project-card" data-project="devhub">
             <div class="pc-tags"><span>React</span><span>Node.js</span><span>MongoDB</span></div>
@@ -212,20 +219,21 @@
     <!-- HACKTOBERFEST -->
     <div class="card-panel" id="hacktoberfest-section" data-panel="hacktoberfest">
       <div class="panel-content panel-right">
+        <button class="panel-close-btn" data-close aria-label="Close panel"><i class="fa-solid fa-xmark"></i></button>
         <span class="panel-tag">Open Source</span>
         <h2 class="panel-h2">Hacktoberfest &amp; Contributions</h2>
         <div class="hf-spotlight">
           <div class="hf-badge"><i class="fa-brands fa-github"></i><span>HF '24</span></div>
           <div>
-            <h3>Official Participant — Team <span class="gold-text">VYPR</span></h3>
+            <h3>Official Participant — Team <span class="accent-text">VYPR</span></h3>
             <p>Shipped meaningful open-source contributions across October — reviewing issues, refactoring code, writing docs, and helping the global developer community build better software.</p>
           </div>
         </div>
         <div class="hf-stats">
-          <div class="hf-stat"><span class="hf-num gold-text">10+</span><span>PRs Merged</span></div>
-          <div class="hf-stat"><span class="hf-num gold-text">4</span><span>Repos</span></div>
-          <div class="hf-stat"><span class="hf-num gold-text">VYPR</span><span>Team</span></div>
-          <div class="hf-stat"><span class="hf-num gold-text">✓</span><span>Badge Earned</span></div>
+          <div class="hf-stat"><span class="hf-num accent-text">10+</span><span>PRs Merged</span></div>
+          <div class="hf-stat"><span class="hf-num accent-text">4</span><span>Repos</span></div>
+          <div class="hf-stat"><span class="hf-num accent-text">VYPR</span><span>Team</span></div>
+          <div class="hf-stat"><span class="hf-num accent-text">✓</span><span>Badge Earned</span></div>
         </div>
         <p class="hf-quote"><em>"The best code is written together."</em></p>
       </div>
@@ -234,6 +242,7 @@
     <!-- BEYOND THE SCREEN -->
     <div class="card-panel" id="beyond-section" data-panel="beyond">
       <div class="panel-content">
+        <button class="panel-close-btn" data-close aria-label="Close panel"><i class="fa-solid fa-xmark"></i></button>
         <span class="panel-tag">Off the Keyboard</span>
         <h2 class="panel-h2">Beyond the Screen</h2>
         <p class="panel-sub-sm">The arenas that sharpened my focus and forged my discipline.</p>
@@ -279,6 +288,7 @@
     <!-- CONTACT -->
     <div class="card-panel" id="contact-section" data-panel="contact">
       <div class="panel-content">
+        <button class="panel-close-btn" data-close aria-label="Close panel"><i class="fa-solid fa-xmark"></i></button>
         <span class="panel-tag">Let's Talk</span>
         <h2 class="panel-h2">Get In Touch</h2>
         <p class="panel-sub-sm">Open to internships, open-source collabs, hackathons, and long conversations about tech, sport, and roads.</p>
@@ -315,7 +325,7 @@
               <div class="cf-input-wrap"><textarea id="cf-msg" rows="4" placeholder="Say something…" required></textarea></div>
               <span class="cf-err" id="err-msg">Message must be at least 10 chars.</span>
             </div>
-            <button type="submit" class="btn-gold" id="cf-submit">
+            <button type="submit" class="btn-blue" id="cf-submit">
               <span id="cf-label">Send Message</span>
               <i class="fa-regular fa-paper-plane" id="cf-icon"></i>
               <i class="fa-solid fa-circle-notch fa-spin" id="cf-spin" style="display:none"></i>
@@ -335,27 +345,6 @@
     <h1>Surya — Engineer, Athlete, Creator, Rider</h1>
     <p>B.Tech CS student at Newton School of Technology. Open source contributor with Team VYPR. State-level cricketer, district-level badminton player, competitive tennis player, skating hockey athlete. Passionate guitarist and long-distance motorcycle rider.</p>
   </div>
-
-  <!-- ══════════════════════════════════════════
-       CUSTOM CURSOR
-  ══════════════════════════════════════════ -->
-  <div id="cursor-dot"  aria-hidden="true"></div>
-  <div id="cursor-ring" aria-hidden="true"></div>
-
-  <!-- ══════════════════════════════════════════
-       SCROLL VINE (side progress)
-  ══════════════════════════════════════════ -->
-  <div id="scroll-vine" aria-hidden="true">
-    <div id="vine-track">
-      <div id="vine-fill"></div>
-      <div id="vine-leaf"></div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════
-       SCROLL PROXY (drives Three.js camera)
-  ══════════════════════════════════════════ -->
-  <div id="scroll-proxy" aria-hidden="true"></div>
 
   <!-- ══════════════════════════════════════════
        2D FALLBACK (shown when WebGL unavailable)

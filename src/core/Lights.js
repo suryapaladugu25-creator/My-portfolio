@@ -1,61 +1,43 @@
-// Lights.js — Warm gold key light + cool dim rim light + subtle ambient
+// Lights.js — Warm Natural Sunlight + Soft Sky Fill + Shadows
 import * as THREE from 'three';
 import { PALETTE } from '../utils/Palette.js';
 
 export function createLights(scene, device) {
   const lights = {};
 
-  // Ambient — calm, dim deep background tone
-  lights.ambient = new THREE.AmbientLight(PALETTE.hex.bgGradientMid, 0.55);
+  // Ambient sky bounce — matches the light blue horizon
+  lights.ambient = new THREE.AmbientLight(PALETTE.hex.ambientDay, 0.75);
   scene.add(lights.ambient);
 
-  // Warm key light — gentle warm gold (#E6B450), soft intensity
-  lights.key = new THREE.DirectionalLight(PALETTE.hex.accentGold, 1.15);
-  lights.key.position.set(5, 18, 8);
-  lights.key.castShadow = !device.isLowEnd;
+  // Warm sunlight (#FFF4D6) from high-angle
+  lights.sun = new THREE.DirectionalLight(PALETTE.hex.sunlightWarm, 1.4);
+  lights.sun.position.set(12, 28, 14);
+  lights.sun.castShadow = !device.isLowEnd;
+
   if (!device.isLowEnd) {
-    lights.key.shadow.mapSize.width  = 1024;
-    lights.key.shadow.mapSize.height = 1024;
-    lights.key.shadow.camera.near   = 0.5;
-    lights.key.shadow.camera.far    = 70;
-    lights.key.shadow.camera.left   = -18;
-    lights.key.shadow.camera.right  = 18;
-    lights.key.shadow.camera.top    = 18;
-    lights.key.shadow.camera.bottom = -18;
+    lights.sun.shadow.mapSize.width  = 1024;
+    lights.sun.shadow.mapSize.height = 1024;
+    lights.sun.shadow.camera.near   = 0.5;
+    lights.sun.shadow.camera.far    = 70;
+    lights.sun.shadow.camera.left   = -16;
+    lights.sun.shadow.camera.right  = 16;
+    lights.sun.shadow.camera.top    = 18;
+    lights.sun.shadow.camera.bottom = -16;
+    lights.sun.shadow.bias          = -0.0008;
   }
-  scene.add(lights.key);
+  scene.add(lights.sun);
 
-  // Cool, dim rim light — soft sky blue (#8FB8E8), not oversaturated
-  lights.rim = new THREE.DirectionalLight(PALETTE.hex.tertiarySky, 0.45);
-  lights.rim.position.set(-8, 12, -12);
-  scene.add(lights.rim);
-
-  // Ground bounce fill — very quiet dark tone
-  lights.fill = new THREE.HemisphereLight(0x182028, 0x0B0F14, 0.3);
-  scene.add(lights.fill);
-
-  // Firefly point lights — reduced count, very subtle warmth
-  lights.firePointLights = [];
-  const count = device.isLowEnd ? 1 : 3;
-  for (let i = 0; i < count; i++) {
-    const pl = new THREE.PointLight(PALETTE.hex.accentGold, 0.3, 6);
-    pl.position.set(
-      (Math.random() - 0.5) * 12,
-      Math.random() * 10 + 2,
-      (Math.random() - 0.5) * 12
-    );
-    scene.add(pl);
-    lights.firePointLights.push(pl);
-  }
+  // Soft sky-fill hemisphere light (sky blue from above, soft grass green bounce from below)
+  lights.hemi = new THREE.HemisphereLight(
+    PALETTE.hex.skyHorizonDay,
+    0x2E6038, // grass bounce
+    0.5
+  );
+  scene.add(lights.hemi);
 
   return lights;
 }
 
 export function updateLights(lights, time) {
-  // Gentle, slow breathing of firefly lights
-  lights.firePointLights.forEach((pl, i) => {
-    pl.intensity = 0.2 + (Math.sin(time * 0.5 + i * 1.8) * 0.5 + 0.5) * 0.25;
-    pl.position.x += Math.sin(time * 0.15 + i) * 0.001;
-    pl.position.y += Math.cos(time * 0.2 + i * 0.8) * 0.001;
-  });
+  // Sunlight stays steady and natural
 }

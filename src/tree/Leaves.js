@@ -1,34 +1,25 @@
 /**
- * Leaves.js — Storybook Painterly Leaves
- * Features:
- *  - Small instanced leaf cards layered in clusters for depth
- *  - 4 distinct leaf color variations (deep forest, mid green, fresh spring, sunlit golden-green)
- *  - Fake subsurface scattering shader: light shines warmly through back of leaves
- *  - Gentle organic wind sway (small amplitude, slow frequency)
- *  - Procedural leaf alpha shape (soft hand-painted contour)
+ * Leaves.js — Leaves with dynamic per-section palette shifts (~1.2s smooth GSAP transitions)
  */
 import * as THREE from 'three';
+import { gsap } from 'gsap';
 import { PALETTE } from '../utils/Palette.js';
 
 const LEAF_VERT = `
   attribute float aPhase;
   attribute float aScale;
-  attribute vec3  aColor;
-  attribute float aSunlit;
+  attribute float aToneIdx;
   uniform float uTime;
   uniform float uWind;
   varying vec2  vUv;
-  varying vec3  vColor;
+  varying float vToneIdx;
   varying vec3  vNormal;
   varying vec3  vWorldPos;
-  varying float vSunlit;
 
   void main() {
-    vUv     = uv;
-    vColor  = aColor;
-    vSunlit = aSunlit;
+    vUv      = uv;
+    vToneIdx = aToneIdx;
 
-    // Gentle slow wind sway with per-instance phase
     vec3 pos = position;
     float swayX = sin(uTime * 0.40 + aPhase * 6.28) * uWind;
     float swayY = cos(uTime * 0.30 + aPhase * 3.14) * uWind * 0.45;
@@ -47,39 +38,41 @@ const LEAF_VERT = `
 
 const LEAF_FRAG = `
   precision mediump float;
+  uniform vec3  uColor0;
+  uniform vec3  uColor1;
+  uniform vec3  uColor2;
+  uniform vec3  uColor3;
   uniform vec3  uSunDir;
   uniform vec3  uSunColor;
   varying vec2  vUv;
-  varying vec3  vColor;
+  varying float vToneIdx;
   varying vec3  vNormal;
   varying vec3  vWorldPos;
-  varying float vSunlit;
 
   void main() {
-    // Hand-painted organic oval leaf contour
     vec2 p = vUv * 2.0 - 1.0;
-    // Taper top and base of leaf
     float r = length(vec2(p.x * 1.35, p.y + p.x * p.x * 0.15));
     float alpha = 1.0 - smoothstep(0.72, 0.98, r);
     if (alpha < 0.05) discard;
 
-    // Fake Subsurface Scattering (Backlight transmission)
-    // When looking at leaves with the sun behind them, warm light glows through
+    // Pick leaf color based on instance tone index (0, 1, 2, or 3)
+    vec3 baseColor = uColor1;
+    if (vToneIdx < 0.5)      baseColor = uColor0;
+    else if (vToneIdx < 1.5) baseColor = uColor1;
+    else if (vToneIdx < 2.5) baseColor = uColor2;
+    else                     baseColor = uColor3;
+
+    // Subsurface glow & sunlight
     vec3 viewDir = normalize(cameraPosition - vWorldPos);
     vec3 sunDir  = normalize(uSunDir);
     float dotSunView = dot(-sunDir, viewDir);
     float sss = pow(max(dotSunView, 0.0), 2.2) * 0.65;
 
-    // Front diffuse sunlight
     float diff = max(dot(vNormal, sunDir), 0.0);
-    // Soft ambient wrap light
     float wrap = max(dot(vNormal, sunDir) * 0.5 + 0.5, 0.0);
 
-    // Warm golden transmission through leaves
-    vec3 sssColor = uSunColor * (vColor + vec3(0.12, 0.18, 0.02)) * sss;
-
-    // Shading with depth: sunny exterior vs shaded interior
-    vec3 finalColor = vColor * (diff * 0.55 + wrap * 0.45 + 0.18) + sssColor;
+    vec3 sssColor = uSunColor * (baseColor + vec3(0.14, 0.10, 0.02)) * sss;
+    vec3 finalColor = baseColor * (diff * 0.55 + wrap * 0.45 + 0.20) + sssColor;
 
     gl_FragColor = vec4(finalColor, alpha * 0.94);
   }
@@ -88,61 +81,41 @@ const LEAF_FRAG = `
 export class LeavesSystem {
   constructor(scene, tree, device) {
     this.device = device;
-    // High density clusters for painterly volume
     const count = device.isLowEnd ? 900 : 2600;
 
-    // Small leaf card geometry
     const geo = new THREE.PlaneGeometry(0.38, 0.52, 1, 1);
 
-    const phases  = new Float32Array(count);
-    const scales  = new Float32Array(count);
-    const colors  = new Float32Array(count * 3);
-    const sunlits = new Float32Array(count);
+    const phases   = new Float32Array(count);
+    const scales   = new Float32Array(count);
+    const toneIdxs = new Float32Array(count);
 
-    // Rich storybook palette: 4 layered shades
-    const leafPalette = [
-      new THREE.Color(0x236838), // Deep inner shadow green
-      new THREE.Color(0x358D4B), // Rich classic foliage
-      new THREE.Color(0x4FA862), // Mid fresh green
-      new THREE.Color(0x82D468), // Bright sun-kissed golden-green
-    ];
+    const initHero = PALETTE.sections.hero.leaves;
 
     for (let i = 0; i < count; i++) {
       phases[i] = Math.random();
       scales[i] = 0.70 + Math.random() * 0.55;
 
       const rand = Math.random();
-      let chosenColor;
-      let isSunlit = 0.0;
-
-      if (rand < 0.25) {
-        chosenColor = leafPalette[0]; // deep inner
-      } else if (rand < 0.58) {
-        chosenColor = leafPalette[1]; // mid
-      } else if (rand < 0.82) {
-        chosenColor = leafPalette[2]; // fresh
-      } else {
-        chosenColor = leafPalette[3]; // sunlit highlight
-        isSunlit = 1.0;
-      }
-
-      colors[i * 3]     = chosenColor.r;
-      colors[i * 3 + 1] = chosenColor.g;
-      colors[i * 3 + 2] = chosenColor.b;
-      sunlits[i]        = isSunlit;
+      if (rand < 0.25)      toneIdxs[i] = 0.0;
+      else if (rand < 0.60) toneIdxs[i] = 1.0;
+      else if (rand < 0.85) toneIdxs[i] = 2.0;
+      else                  toneIdxs[i] = 3.0;
     }
 
-    geo.setAttribute('aPhase',  new THREE.InstancedBufferAttribute(phases, 1));
-    geo.setAttribute('aScale',  new THREE.InstancedBufferAttribute(scales, 1));
-    geo.setAttribute('aColor',  new THREE.InstancedBufferAttribute(colors, 3));
-    geo.setAttribute('aSunlit', new THREE.InstancedBufferAttribute(sunlits, 1));
+    geo.setAttribute('aPhase',   new THREE.InstancedBufferAttribute(phases, 1));
+    geo.setAttribute('aScale',   new THREE.InstancedBufferAttribute(scales, 1));
+    geo.setAttribute('aToneIdx', new THREE.InstancedBufferAttribute(toneIdxs, 1));
 
     this.mat = new THREE.ShaderMaterial({
       uniforms: {
         uTime:     { value: 0 },
         uWind:     { value: device.isLowEnd ? 0.012 : 0.022 },
         uSunDir:   { value: new THREE.Vector3(12, 28, 14).normalize() },
-        uSunColor: { value: new THREE.Color(PALETTE.hex.sunlightWarm) },
+        uSunColor: { value: new THREE.Color(PALETTE.sections.hero.sunColor) },
+        uColor0:   { value: new THREE.Color(initHero[0]) },
+        uColor1:   { value: new THREE.Color(initHero[1]) },
+        uColor2:   { value: new THREE.Color(initHero[2]) },
+        uColor3:   { value: new THREE.Color(initHero[3]) },
       },
       vertexShader:   LEAF_VERT,
       fragmentShader: LEAF_FRAG,
@@ -154,15 +127,12 @@ export class LeavesSystem {
     this.mesh = new THREE.InstancedMesh(geo, this.mat, count);
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
-    // Group leaves into full layered spheres/clouds around branch tip positions
     const tips = tree.tipPositions.length > 0 ? tree.tipPositions : [new THREE.Vector3(0, 9, 0)];
     const dummy = new THREE.Object3D();
     const clusterSpread = 3.6;
 
     for (let i = 0; i < count; i++) {
       const tip = tips[i % tips.length];
-
-      // Volume distribution with concentration toward outer rim
       const u = Math.random();
       const v = Math.random();
       const theta = u * 2.0 * Math.PI;
@@ -175,7 +145,6 @@ export class LeavesSystem {
         tip.z + r * Math.cos(phi)
       );
 
-      // Painterly leaf orientation (billboard-leaning with variety)
       dummy.rotation.set(
         (Math.random() - 0.5) * 1.2,
         Math.random() * Math.PI * 2,
@@ -188,6 +157,37 @@ export class LeavesSystem {
 
     this.mesh.instanceMatrix.needsUpdate = true;
     scene.add(this.mesh);
+  }
+
+  /**
+   * Smoothly shift leaf colors to target section palette (~1.2s)
+   */
+  setSectionColors(sectionConfig) {
+    if (!sectionConfig || !sectionConfig.leaves) return;
+    const leaves = sectionConfig.leaves;
+
+    for (let c = 0; c < 4; c++) {
+      const targetCol = new THREE.Color(leaves[c]);
+      const uniformCol = this.mat.uniforms[`uColor${c}`].value;
+
+      gsap.to(uniformCol, {
+        r: targetCol.r,
+        g: targetCol.g,
+        b: targetCol.b,
+        duration: 1.2,
+        ease: 'power2.out',
+      });
+    }
+
+    if (sectionConfig.sunColor) {
+      const targetSun = new THREE.Color(sectionConfig.sunColor);
+      gsap.to(this.mat.uniforms.uSunColor.value, {
+        r: targetSun.r,
+        g: targetSun.g,
+        b: targetSun.b,
+        duration: 1.2,
+      });
+    }
   }
 
   setCalm(isCalm) {

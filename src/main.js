@@ -1,7 +1,7 @@
 /**
- * main.js — Natural 3D Tree Portfolio with Click-To-Open Sections
- * Daytime blue sky, realistic tree, instanced green canopy,
- * click tree parts or nav links to focus camera & open panels.
+ * main.js — Guided Section Journey with LLM Playground Palette
+ * Connects 7 scroll steps, 7-dot indicator, smooth 1.2s camera transitions,
+ * per-section tree palette shifts, and internal panel scrolling.
  */
 
 import './style.css';
@@ -68,33 +68,36 @@ async function init3D() {
 
   loading.setProgress(35);
 
-  // Realistic natural tree with bark, roots, branches, and props
+  // Storybook tree
   const tree = new TreeGenerator(scene, device);
   tree.generate();
   loading.setProgress(60);
 
-  // Instanced multi-toned green foliage canopy
+  // Dynamic color-shifting leaves system
   const leaves = new LeavesSystem(scene, tree, device);
   loading.setProgress(75);
 
-  // Storybook environment: rolling hills, stone path, swaying grass, butterflies, god rays
+  // Environment (meadow, cobblestones, grass, butterflies, rays)
   const env = new EnvironmentFX(scene, device);
   loading.setProgress(88);
 
-  // Sections and interaction manager
+  // Setup per-section dynamic transitions
+  setupSectionColorManager(scene, lights, leaves);
+
+  // Guided scroll & section journey manager
   const sections = new SectionsManager(scene, camCtrl, tree);
   const navbar   = new NavbarUI(sections);
-  initUIOnly(sections, scene, lights);
+  initUIOnly(sections);
   loading.setProgress(100);
 
   loading.complete(() => {
-    // Start at overview; user can click the tree or navbar
+    // Initial hero section is shown
   });
 
-  // Tooltip element for hovering clickable parts
+  // Tooltip element
   const tooltip = createTooltip();
 
-  // Raycaster for clicking & hovering tree parts
+  // Raycaster for clicking tree parts
   const raycaster = new THREE.Raycaster();
   const mouse     = new THREE.Vector2(-999, -999);
 
@@ -103,26 +106,23 @@ async function init3D() {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   });
 
-  // Canvas interaction
-  canvas.addEventListener('click', (e) => {
+  canvas.addEventListener('click', () => {
     raycaster.setFromCamera(mouse, camCtrl.camera);
     const hits = raycaster.intersectObjects(sections.interactives, true);
     if (hits.length > 0) {
-      // Find nearest hit with section data
       let targetObj = hits[0].object;
       while (targetObj && !targetObj.userData.section && targetObj.parent) {
         targetObj = targetObj.parent;
       }
       if (targetObj && targetObj.userData.section) {
-        sections.openSection(targetObj.userData.section, targetObj.userData);
+        sections.goToSection(targetObj.userData.section);
       }
     }
   });
 
-  // Explore hint click opens hero
   const hint = document.getElementById('tree-explore-hint');
   hint?.addEventListener('click', () => {
-    sections.openSection('hero');
+    sections.goToSection('about');
   });
 
   // Render loop
@@ -141,7 +141,7 @@ async function init3D() {
     updateSceneClouds(scene.userData.clouds, dt);
     updateLights(lights, t);
 
-    // Hover detection on tree parts
+    // Hover detection
     raycaster.setFromCamera(mouse, camCtrl.camera);
     const hits = raycaster.intersectObjects(sections.interactives, true);
     if (hits.length > 0) {
@@ -179,58 +179,67 @@ async function init3D() {
   animate();
 }
 
-// ── Sky Atmosphere Handler (Smooth Transitions) ─────────────────────────────
-function setupSkyAtmosphere(scene, lights) {
-  window.__setSkyAtmosphere = function(section) {
+/**
+ * Manages per-section color shifts for sky, fog, lights, and foliage (~1.2s smooth transitions)
+ */
+function setupSectionColorManager(scene, lights, leaves) {
+  window.__setSectionColors = function(sectionId) {
+    const secCfg = PALETTE.sections[sectionId] || PALETTE.sections.hero;
     const skyMat = scene.userData.skyMat;
-    if (!skyMat) return;
 
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    // 1. Shift Leaves
+    leaves.setSectionColors(secCfg);
 
-    let topHex    = PALETTE.hex.skyTopDay;
-    let bottomHex = PALETTE.hex.skyHorizonDay;
+    // 2. Shift Sky Dome
+    if (skyMat) {
+      const topCol = new THREE.Color(secCfg.skyTop);
+      const btmCol = new THREE.Color(secCfg.skyHorizon);
 
-    if (isDark) {
-      topHex    = PALETTE.hex.skyTopDark;
-      bottomHex = PALETTE.hex.skyHorizonDark;
-    } else {
-      if (section === 'about' || section === 'skills') {
-        topHex    = PALETTE.hex.skyTealTop;
-        bottomHex = PALETTE.hex.skyTealHorizon;
-      } else if (section === 'beyond') {
-        topHex    = PALETTE.hex.skySunsetTop;
-        bottomHex = PALETTE.hex.skySunsetHorizon;
-      }
+      gsap.to(skyMat.uniforms.uTopColor.value, {
+        r: topCol.r, g: topCol.g, b: topCol.b,
+        duration: 1.2,
+        ease: 'power2.out',
+      });
+      gsap.to(skyMat.uniforms.uBottomColor.value, {
+        r: btmCol.r, g: btmCol.g, b: btmCol.b,
+        duration: 1.2,
+        ease: 'power2.out',
+      });
     }
 
-    gsap.to(skyMat.uniforms.uTopColor.value, {
-      r: new THREE.Color(topHex).r,
-      g: new THREE.Color(topHex).g,
-      b: new THREE.Color(topHex).b,
-      duration: 1.2,
-      ease: 'power2.out',
-    });
-
-    gsap.to(skyMat.uniforms.uBottomColor.value, {
-      r: new THREE.Color(bottomHex).r,
-      g: new THREE.Color(bottomHex).g,
-      b: new THREE.Color(bottomHex).b,
-      duration: 1.2,
-      ease: 'power2.out',
-    });
-
+    // 3. Shift Fog
     if (scene.fog) {
+      const fogCol = new THREE.Color(secCfg.fog);
       gsap.to(scene.fog.color, {
-        r: new THREE.Color(bottomHex).r,
-        g: new THREE.Color(bottomHex).g,
-        b: new THREE.Color(bottomHex).b,
+        r: fogCol.r, g: fogCol.g, b: fogCol.b,
+        duration: 1.2,
+      });
+    }
+
+    // 4. Shift Sun / Key Light
+    if (lights.sun) {
+      const sunCol = new THREE.Color(secCfg.sunColor);
+      gsap.to(lights.sun.color, {
+        r: sunCol.r, g: sunCol.g, b: sunCol.b,
+        duration: 1.2,
+      });
+      gsap.to(lights.sun, {
+        intensity: secCfg.sunIntensity,
+        duration: 1.2,
+      });
+    }
+
+    // 5. Crown glow shift
+    if (lights.crownGlow) {
+      const pCol = new THREE.Color(secCfg.particleColor);
+      gsap.to(lights.crownGlow.color, {
+        r: pCol.r, g: pCol.g, b: pCol.b,
         duration: 1.2,
       });
     }
   };
 }
 
-// ── Tooltip ──────────────────────────────────────────────────────────────────
 function createTooltip() {
   let el = document.getElementById('tooltip-3d');
   if (!el) {
@@ -255,27 +264,19 @@ window.addEventListener('mousemove', (e) => {
   }
 });
 
-// ── UI-only init (Theme toggle, Calm Mode, Contact Form, Fly buttons) ─────────
-function initUIOnly(sections, scene, lights) {
+function initUIOnly(sections) {
   const html      = document.documentElement;
   const themeBtn  = document.getElementById('theme-btn');
   const themeIcon = document.getElementById('theme-icon');
-  const saved     = localStorage.getItem('surya-theme') || 'light';
+  const saved     = localStorage.getItem('surya-theme') || 'dark';
   html.setAttribute('data-theme', saved);
   if (themeIcon) themeIcon.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-
-  if (scene && lights) {
-    setupSkyAtmosphere(scene, lights);
-  }
 
   themeBtn?.addEventListener('click', () => {
     const t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', t);
     localStorage.setItem('surya-theme', t);
     if (themeIcon) themeIcon.className = t === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-    if (window.__setSkyAtmosphere && sections) {
-      window.__setSkyAtmosphere(sections.activeSection || 'overview');
-    }
   });
 
   const calmBtn = document.getElementById('calm-mode-btn');
@@ -287,7 +288,6 @@ function initUIOnly(sections, scene, lights) {
     });
   }
 
-  // Hamburger
   const hamburger = document.getElementById('hamburger');
   const nbLinks   = document.getElementById('nb-links');
   hamburger?.addEventListener('click', () => {
@@ -300,26 +300,18 @@ function initUIOnly(sections, scene, lights) {
     hamburger?.classList.remove('open');
   }));
 
-  // CTA buttons inside panels
   document.querySelectorAll('[data-fly]').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.fly;
-      if (sections) sections.openSection(target);
+      if (sections) sections.goToSection(target);
     });
   });
 
-  // Contact links
   document.querySelectorAll('.contact-orb[data-href]').forEach(orb => {
     orb.addEventListener('click', () => window.open(orb.dataset.href, '_blank'));
   });
 
-  // Contact form
   initContactForm();
-
-  // Scroll shadow on navbar
-  window.addEventListener('scroll', () => {
-    document.getElementById('navbar')?.classList.toggle('nb-scrolled', window.scrollY > 10);
-  });
 }
 
 function initContactForm() {

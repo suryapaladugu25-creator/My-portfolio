@@ -1,23 +1,23 @@
 /**
- * Scene.js — Daytime Blue Sky Gradient & Drifting Clouds
- * Sky gradient from #4A90D9 (top) to #BFE3FF (horizon).
- * Soft white clouds drifting gently across the scene.
- * Seamless transitions to teal or sunset atmospheres.
+ * Scene.js — LLM Playground Style Night Sky with Deep Gradient, Soft Stars & Subtle Moon
  */
 import * as THREE from 'three';
+import { gsap } from 'gsap';
 import { PALETTE } from '../utils/Palette.js';
 
 export function createScene() {
   const scene = new THREE.Scene();
 
+  const heroCfg = PALETTE.sections.hero;
+
   // Sky dome / background gradient
   const skyGeo = new THREE.SphereGeometry(180, 32, 16);
   const skyMat = new THREE.ShaderMaterial({
     uniforms: {
-      uTopColor:     { value: new THREE.Color(PALETTE.hex.skyTopDay) },
-      uBottomColor:  { value: new THREE.Color(PALETTE.hex.skyHorizonDay) },
-      uOffset:       { value: 15.0 },
-      uExponent:     { value: 0.65 },
+      uTopColor:    { value: new THREE.Color(heroCfg.skyTop) },
+      uBottomColor: { value: new THREE.Color(heroCfg.skyHorizon) },
+      uOffset:      { value: 12.0 },
+      uExponent:    { value: 0.70 },
     },
     vertexShader: `
       varying vec3 vWorldPosition;
@@ -46,68 +46,85 @@ export function createScene() {
   scene.add(skyDome);
   scene.userData.skyMat = skyMat;
 
-  // Soft atmospheric fog matching the horizon
-  scene.fog = new THREE.Fog(PALETTE.hex.skyHorizonDay, 30, 160);
+  // Soft stars in upper sky
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 380;
+  const starPositions = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(Math.random() * 0.75 + 0.25); // upper hemisphere
+    const r = 160;
+    starPositions[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+    starPositions[i * 3 + 1] = r * Math.cos(phi);
+    starPositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+  const starMat = new THREE.PointsMaterial({
+    color: 0xE8ECF3,
+    size: 0.8,
+    transparent: true,
+    opacity: 0.55,
+    sizeAttenuation: false,
+  });
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
 
-  // Soft white clouds
-  scene.userData.clouds = createClouds(scene);
+  // Soft faint moon
+  const moonGeo = new THREE.SphereGeometry(3.5, 16, 16);
+  const moonMat = new THREE.MeshBasicMaterial({
+    color: 0xE2E8F0,
+    transparent: true,
+    opacity: 0.65,
+  });
+  const moon = new THREE.Mesh(moonGeo, moonMat);
+  moon.position.set(-35, 42, -90);
+  scene.add(moon);
+
+  // Low fog
+  scene.fog = new THREE.Fog(heroCfg.fog, 25, 140);
+
+  // Soft drifting mist layers
+  scene.userData.clouds = createMist(scene);
 
   return scene;
 }
 
-function createClouds(scene) {
-  const cloudGroup = new THREE.Group();
-  const cloudGeo   = new THREE.DodecahedronGeometry(2.5, 1);
-  const cloudMat   = new THREE.MeshStandardMaterial({
-    color: 0xFFFFFF,
-    roughness: 0.95,
-    metalness: 0.0,
+function createMist(scene) {
+  const mistGroup = new THREE.Group();
+  const mistGeo   = new THREE.PlaneGeometry(32, 8);
+  const mistMat   = new THREE.MeshBasicMaterial({
+    color: 0x1A2236,
     transparent: true,
-    opacity: 0.82,
-    flatShading: true,
+    opacity: 0.25,
+    side: THREE.DoubleSide,
+    depthWrite: false,
   });
 
-  const clouds = [];
+  const mists = [];
   const configs = [
-    { x: -28, y: 16, z: -35, scale: 2.2, speed: 0.25 },
-    { x:  14, y: 22, z: -45, scale: 2.8, speed: 0.18 },
-    { x:  36, y: 14, z: -30, scale: 1.8, speed: 0.32 },
-    { x: -10, y: 28, z: -55, scale: 3.4, speed: 0.15 },
+    { x: -15, y: -2.0, z: -15, scale: 1.0, speed: 0.15 },
+    { x:  18, y: -1.5, z: -20, scale: 1.2, speed: 0.12 },
+    { x:  -8, y: -3.0, z: -10, scale: 0.8, speed: 0.18 },
   ];
 
   configs.forEach(cfg => {
-    const puffGroup = new THREE.Group();
-    // Composite puff from 3-4 spheres
-    const p1 = new THREE.Mesh(cloudGeo, cloudMat);
-    const p2 = new THREE.Mesh(cloudGeo, cloudMat);
-    p2.position.set(1.8, -0.4, 0.5);
-    p2.scale.set(0.75, 0.75, 0.75);
-    const p3 = new THREE.Mesh(cloudGeo, cloudMat);
-    p3.position.set(-1.6, -0.3, -0.4);
-    p3.scale.set(0.8, 0.8, 0.8);
-
-    puffGroup.add(p1);
-    puffGroup.add(p2);
-    puffGroup.add(p3);
-
-    puffGroup.position.set(cfg.x, cfg.y, cfg.z);
-    puffGroup.scale.setScalar(cfg.scale);
-
-    cloudGroup.add(puffGroup);
-    clouds.push({ mesh: puffGroup, speed: cfg.speed });
+    const m = new THREE.Mesh(mistGeo, mistMat);
+    m.position.set(cfg.x, cfg.y, cfg.z);
+    m.scale.setScalar(cfg.scale);
+    mistGroup.add(m);
+    mists.push({ mesh: m, speed: cfg.speed });
   });
 
-  scene.add(cloudGroup);
-  return clouds;
+  scene.add(mistGroup);
+  return mists;
 }
 
-export function updateSceneClouds(clouds, dt) {
-  if (!clouds) return;
-  clouds.forEach(c => {
-    c.mesh.position.x += c.speed * dt * 2.0;
-    // Wrap around horizontally
-    if (c.mesh.position.x > 60) {
-      c.mesh.position.x = -60;
+export function updateSceneClouds(mists, dt) {
+  if (!mists) return;
+  mists.forEach(m => {
+    m.mesh.position.x += m.speed * dt * 2.0;
+    if (m.mesh.position.x > 35) {
+      m.mesh.position.x = -35;
     }
   });
 }

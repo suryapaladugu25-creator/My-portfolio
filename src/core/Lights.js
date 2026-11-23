@@ -1,17 +1,18 @@
-// Lights.js — Warm Natural Sunlight + Soft Sky Fill + Shadows
+// Lights.js — Warm Key Light + Cool Rim Light + Warm Bark Light (No harsh bloom)
 import * as THREE from 'three';
 import { PALETTE } from '../utils/Palette.js';
 
 export function createLights(scene, device) {
   const lights = {};
+  const heroCfg = PALETTE.sections.hero;
 
-  // Ambient sky bounce — matches the light blue horizon
-  lights.ambient = new THREE.AmbientLight(PALETTE.hex.ambientDay, 0.75);
+  // Ambient — matches dark horizon with soft navy fill
+  lights.ambient = new THREE.AmbientLight(heroCfg.skyHorizon, 0.85);
   scene.add(lights.ambient);
 
-  // Warm sunlight (#FFF4D6) from high-angle
-  lights.sun = new THREE.DirectionalLight(PALETTE.hex.sunlightWarm, 1.4);
-  lights.sun.position.set(12, 28, 14);
+  // Warm key light — directional sunlight/moonlight
+  lights.sun = new THREE.DirectionalLight(heroCfg.sunColor, heroCfg.sunIntensity);
+  lights.sun.position.set(10, 24, 12);
   lights.sun.castShadow = !device.isLowEnd;
 
   if (!device.isLowEnd) {
@@ -27,17 +28,27 @@ export function createLights(scene, device) {
   }
   scene.add(lights.sun);
 
-  // Soft sky-fill hemisphere light (sky blue from above, soft grass green bounce from below)
-  lights.hemi = new THREE.HemisphereLight(
-    PALETTE.hex.skyHorizonDay,
-    0x2E6038, // grass bounce
-    0.5
-  );
-  scene.add(lights.hemi);
+  // Cool rim light from behind so the tree silhouette never looks flat black
+  lights.rim = new THREE.DirectionalLight(0x40608A, 0.75);
+  lights.rim.position.set(-8, 14, -12);
+  scene.add(lights.rim);
+
+  // Warm bark fill light from low angle — highlights bark details (#8A6244)
+  lights.barkFill = new THREE.PointLight(PALETTE.hex.accentAmber, 0.65, 14);
+  lights.barkFill.position.set(2, 0.5, 4.5);
+  scene.add(lights.barkFill);
+
+  // Orange crown glow for tree canopy
+  lights.crownGlow = new THREE.PointLight(PALETTE.hex.accentOrange, 0.5, 16);
+  lights.crownGlow.position.set(0, 11, 2);
+  scene.add(lights.crownGlow);
 
   return lights;
 }
 
 export function updateLights(lights, time) {
-  // Sunlight stays steady and natural
+  // Gentle breathing of point lights
+  if (lights.barkFill) {
+    lights.barkFill.intensity = 0.55 + Math.sin(time * 0.8) * 0.12;
+  }
 }

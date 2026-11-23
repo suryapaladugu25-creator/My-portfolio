@@ -1,27 +1,26 @@
 /**
  * Sections.js — 3D lanterns, skill orbs, and panel manager
- * Creates interactive 3D objects at tree positions and manages HTML panel visibility.
+ * Refined palette (gold, soft emerald, sky dawn), subtle pulses, no neon
  */
-
 import * as THREE from 'three';
+import { PALETTE } from '../utils/Palette.js';
 
-// Project data
 const PROJECTS = [
-  { id: 'llm-playground', label: 'LLM Playground 3D', color: 0xf5c842, link: '#' },
-  { id: 'cricket-stats',  label: 'Cricket Analytics',  color: 0x00e5ff, link: '#' },
-  { id: 'open-source',    label: 'Team VYPR — Hacktoberfest', color: 0xa78bfa, link: '#' },
-  { id: 'portfolio-3d',   label: 'Portfolio 3D Tree',   color: 0xffd700, link: '#' },
+  { id: 'llm-playground', label: 'LLM Playground 3D',          color: PALETTE.hex.accentGold, link: '#' },
+  { id: 'cricket-stats',  label: 'Cricket Analytics',          color: PALETTE.hex.secondaryEmerald, link: '#' },
+  { id: 'open-source',    label: 'Team VYPR — Hacktoberfest',  color: PALETTE.hex.tertiarySky, link: '#' },
+  { id: 'portfolio-3d',   label: 'Portfolio 3D Tree',          color: PALETTE.hex.accentHover, link: '#' },
 ];
 
 const SKILLS = [
-  { label: 'JavaScript', color: 0xf7df1e },
-  { label: 'Python',     color: 0x3776ab },
-  { label: 'Three.js',   color: 0x49ef4c },
-  { label: 'React',      color: 0x61dafb },
-  { label: 'Node.js',    color: 0x68a063 },
-  { label: 'Git',        color: 0xf1502f },
-  { label: 'AI / LLMs',  color: 0xa78bfa },
-  { label: 'C / C++',    color: 0x00599c },
+  { label: 'JavaScript', color: PALETTE.hex.accentGold },
+  { label: 'Python',     color: PALETTE.hex.tertiarySky },
+  { label: 'Three.js',   color: PALETTE.hex.secondaryEmerald },
+  { label: 'React',      color: PALETTE.hex.tertiarySky },
+  { label: 'Node.js',    color: PALETTE.hex.emerald1 },
+  { label: 'Git',        color: PALETTE.hex.accentHover },
+  { label: 'AI / LLMs',  color: PALETTE.hex.accentGold },
+  { label: 'C / C++',    color: PALETTE.hex.tertiarySky },
 ];
 
 export class SectionsManager {
@@ -40,10 +39,10 @@ export class SectionsManager {
     this._buildContactOrbs();
   }
 
-  // ── Build glowing project lanterns in the canopy ───────────────────────────
+  // ── Build project lanterns (warm, subtle) ─────────────────────────────────
   _buildLanterns() {
     const tips = this.tree.tipPositions || [];
-    const geo  = new THREE.IcosahedronGeometry(0.35, 2);
+    const geo  = new THREE.IcosahedronGeometry(0.3, 1);
 
     PROJECTS.forEach((proj, i) => {
       const pos = tips[i] || new THREE.Vector3(
@@ -55,59 +54,50 @@ export class SectionsManager {
       const mat = new THREE.MeshStandardMaterial({
         color: proj.color,
         emissive: proj.color,
-        emissiveIntensity: 0.9,
-        metalness: 0.4,
-        roughness: 0.2,
+        emissiveIntensity: 0.35, // subtle glow, no neon
+        metalness: 0.2,
+        roughness: 0.4,
         transparent: true,
-        opacity: 0.92,
+        opacity: 0.88,
       });
 
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.copy(pos);
-      mesh.position.y += 0.5;
+      mesh.position.y += 0.4;
       mesh.userData = {
         label:   proj.label,
         section: 'projects',
         baseY:   mesh.position.y,
-        phase:   i * 1.1,
+        phase:   i * 0.9,
         link:    proj.link,
         isLantern: true,
       };
 
-      // Outer glow ring
-      const ringGeo = new THREE.TorusGeometry(0.55, 0.05, 8, 32);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: proj.color, transparent: true, opacity: 0.5
-      });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.x = Math.PI / 2;
-      mesh.add(ring);
-
-      // Point light inside lantern
-      const light = new THREE.PointLight(proj.color, 1.2, 4);
+      // Subtle, gentle point light
+      const light = new THREE.PointLight(proj.color, 0.4, 3);
       mesh.add(light);
 
       this.scene.add(mesh);
       this.interactives.push(mesh);
-      this._lanterns.push({ mesh, light, ring, mat });
+      this._lanterns.push({ mesh, light, mat });
     });
   }
 
-  // ── Build skill leaf-orbs near branch tips ─────────────────────────────────
+  // ── Build skill leaf-orbs (gentle, soft) ──────────────────────────────────
   _buildSkillOrbs() {
-    const geo = new THREE.SphereGeometry(0.22, 10, 10);
+    const geo = new THREE.SphereGeometry(0.18, 8, 8);
 
     SKILLS.forEach((skill, i) => {
       const angle = (i / SKILLS.length) * Math.PI * 2;
-      const radius = 2.8 + (i % 3) * 0.6;
-      const y      = 2.5 + i * 0.9;
+      const radius = 2.6 + (i % 3) * 0.5;
+      const y      = 2.8 + i * 0.85;
 
       const mat = new THREE.MeshStandardMaterial({
         color: skill.color,
         emissive: skill.color,
-        emissiveIntensity: 0.7,
-        roughness: 0.3,
-        metalness: 0.3,
+        emissiveIntensity: 0.3, // quiet, calm emission
+        roughness: 0.5,
+        metalness: 0.1,
       });
 
       const mesh = new THREE.Mesh(geo, mat);
@@ -119,7 +109,7 @@ export class SectionsManager {
       mesh.userData = {
         label:   skill.label,
         section: 'skills',
-        phase:   i * 0.7,
+        phase:   i * 0.6,
         baseY:   y,
         isOrb:   true,
       };
@@ -130,37 +120,36 @@ export class SectionsManager {
     });
   }
 
-  // ── Build contact orbs at the top ─────────────────────────────────────────
+  // ── Build contact orbs at the tree top ────────────────────────────────────
   _buildContactOrbs() {
     const contacts = [
-      { label: 'GitHub',   color: 0xffffff, href: 'https://github.com/' },
-      { label: 'LinkedIn', color: 0x00aaff, href: 'https://linkedin.com/in/' },
-      { label: 'Email',    color: 0xf5c842, href: 'mailto:surya@example.com' },
+      { label: 'GitHub',   color: PALETTE.hex.textPrimary, href: 'https://github.com/' },
+      { label: 'LinkedIn', color: PALETTE.hex.tertiarySky,  href: 'https://linkedin.com/' },
+      { label: 'Email',    color: PALETTE.hex.accentGold,   href: 'mailto:surya@example.com' },
     ];
 
-    const geo = new THREE.SphereGeometry(0.3, 12, 12);
+    const geo = new THREE.SphereGeometry(0.24, 10, 10);
     contacts.forEach((c, i) => {
       const mat = new THREE.MeshStandardMaterial({
-        color: c.color, emissive: c.color, emissiveIntensity: 0.8,
-        roughness: 0.2, metalness: 0.5,
+        color: c.color,
+        emissive: c.color,
+        emissiveIntensity: 0.35,
+        roughness: 0.4,
+        metalness: 0.2,
       });
       const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set((i - 1) * 2.5, 14, 0);
-      mesh.userData = { label: c.label, section: 'contact', href: c.href, phase: i * 2.1 };
-
-      mesh.userData.onClick = () => window.open(c.href, '_blank');
+      mesh.position.set((i - 1) * 2.2, 14, 0);
+      mesh.userData = { label: c.label, section: 'contact', href: c.href, phase: i * 1.5 };
 
       this.scene.add(mesh);
       this.interactives.push(mesh);
     });
   }
 
-  // ── Show a named panel ────────────────────────────────────────────────────
   showPanel(name) {
     this.setPanelVisible(name, true);
   }
 
-  // ── Toggle panel visibility ───────────────────────────────────────────────
   setPanelVisible(name, visible) {
     const el = document.getElementById(`${name}-section`);
     if (!el) return;
@@ -171,35 +160,29 @@ export class SectionsManager {
     }
   }
 
-  // ── Animate lanterns, orbs every frame ───────────────────────────────────
+  // ── Slow, minimal drift animations ────────────────────────────────────────
   update(time, dt) {
     this._time = time;
 
-    // Lantern bob + pulse
+    // Very gentle lantern float (no swinging, no flashing)
     this._lanterns.forEach(({ mesh, light, mat }) => {
       const ph = mesh.userData.phase;
-      mesh.position.y = mesh.userData.baseY + Math.sin(time * 0.9 + ph) * 0.18;
-      mesh.rotation.y += dt * 0.4;
-      const pulse = 0.7 + 0.3 * Math.sin(time * 1.6 + ph);
-      mat.emissiveIntensity = pulse;
-      light.intensity       = pulse * 1.5;
+      mesh.position.y = mesh.userData.baseY + Math.sin(time * 0.4 + ph) * 0.08;
+      mesh.rotation.y += dt * 0.15;
     });
 
-    // Skill orbs gentle drift
+    // Skill orbs: very calm float
     this._orbMeshes.forEach(({ mesh }) => {
       const ph = mesh.userData.phase;
-      mesh.position.y = mesh.userData.baseY + Math.sin(time * 0.6 + ph) * 0.12;
-      mesh.rotation.x += dt * 0.3;
-      mesh.rotation.z += dt * 0.2;
+      mesh.position.y = mesh.userData.baseY + Math.sin(time * 0.3 + ph) * 0.05;
+      mesh.rotation.y += dt * 0.1;
     });
 
-    // Contact orbs pulse
+    // Contact orbs: slow drift
     this.interactives
       .filter(m => m.userData.section === 'contact')
       .forEach(m => {
-        m.position.y = 14 + Math.sin(time * 1.1 + m.userData.phase) * 0.2;
-        m.rotation.y += dt * 0.5;
+        m.position.y = 14 + Math.sin(time * 0.35 + m.userData.phase) * 0.08;
       });
   }
 }
-

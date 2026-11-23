@@ -1,8 +1,9 @@
 /**
  * Environment.js — Falling leaves, ground mist, and floating dust particles.
+ * 60% particle count reduction, slow, gentle drift.
  */
-
 import * as THREE from 'three';
+import { PALETTE } from '../utils/Palette.js';
 
 export class EnvironmentFX {
   constructor(scene, device) {
@@ -17,28 +18,25 @@ export class EnvironmentFX {
     }
   }
 
-  // ── Falling leaves ─────────────────────────────────────────────────────────
+  // ── Falling leaves (Reduced count, gentle descent) ─────────────────────────
   _buildFallingLeaves() {
-    const count = this.device.isLowEnd ? 60 : 180;
+    // 60% reduction: 24 (low-end) / 65 (standard) vs previous 60 / 180
+    const count = this.device.isLowEnd ? 24 : 65;
     const geo   = new THREE.BufferGeometry();
 
     const positions = new Float32Array(count * 3);
     const phases    = new Float32Array(count);
     const speeds    = new Float32Array(count);
-    const sizes     = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3]     = (Math.random() - 0.5) * 24;
+      positions[i * 3]     = (Math.random() - 0.5) * 22;
       positions[i * 3 + 1] = Math.random() * 20 - 2;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
       phases[i]  = Math.random() * Math.PI * 2;
-      speeds[i]  = 0.3 + Math.random() * 0.5;
-      sizes[i]   = 4 + Math.random() * 8;
+      speeds[i]  = 0.12 + Math.random() * 0.18; // Very slow fall
     }
 
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('aPhase',   new THREE.BufferAttribute(phases,    1));
-    geo.setAttribute('aSpeeds',  new THREE.BufferAttribute(speeds,    1));
 
     this._leafPositions = positions;
     this._leafCount     = count;
@@ -46,12 +44,12 @@ export class EnvironmentFX {
     this._leafPhases    = phases;
 
     const mat = new THREE.PointsMaterial({
-      color: 0xa0c060,
-      size:  0.18,
+      color: PALETTE.hex.secondaryEmerald, // #4FB58F soft emerald
+      size:  0.14,
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.65,
-      blending: THREE.AdditiveBlending,
+      opacity: 0.45,
+      blending: THREE.NormalBlending,
       depthWrite: false,
     });
 
@@ -60,48 +58,34 @@ export class EnvironmentFX {
     this._objects.push(this._leafPoints);
   }
 
-  // ── Ground mist plane ─────────────────────────────────────────────────────
+  // ── Ground mist plane (Calm matching deep dark tones) ─────────────────────
   _buildGroundMist() {
-    // Simple large semi-transparent plane at ground level
-    const geo = new THREE.PlaneGeometry(40, 40, 1, 1);
+    const geo = new THREE.PlaneGeometry(36, 36, 1, 1);
     const mat = new THREE.MeshBasicMaterial({
-      color: 0x1a1a2e,
-      transparent: true,
-      opacity: 0.35,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
-    const mist = new THREE.Mesh(geo, mat);
-    mist.rotation.x = -Math.PI / 2;
-    mist.position.y = -8.5;
-    this.scene.add(mist);
-    this._objects.push(mist);
-
-    // Second thinner layer with slight offset
-    const mat2 = new THREE.MeshBasicMaterial({
-      color: 0x06060f,
+      color: PALETTE.hex.bgDeep,
       transparent: true,
       opacity: 0.5,
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    const mist2 = new THREE.Mesh(geo.clone(), mat2);
-    mist2.rotation.x = -Math.PI / 2;
-    mist2.position.y = -7.8;
-    this.scene.add(mist2);
-    this._objects.push(mist2);
+    const mist = new THREE.Mesh(geo, mat);
+    mist.rotation.x = -Math.PI / 2;
+    mist.position.y = -8.2;
+    this.scene.add(mist);
+    this._objects.push(mist);
   }
 
-  // ── Floating dust motes near the camera ───────────────────────────────────
+  // ── Floating dust motes (Reduced count, slow soft drift) ───────────────────
   _buildFloatingDust() {
-    const count = 300;
+    // 60% reduction: 110 vs previous 300
+    const count = 110;
     const geo   = new THREE.BufferGeometry();
     const pos   = new Float32Array(count * 3);
     const ph    = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
       pos[i * 3]     = (Math.random() - 0.5) * 14;
-      pos[i * 3 + 1] = Math.random() * 16 - 4;
+      pos[i * 3 + 1] = Math.random() * 16 - 3;
       pos[i * 3 + 2] = (Math.random() - 0.5) * 8;
       ph[i] = Math.random() * Math.PI * 2;
     }
@@ -113,11 +97,11 @@ export class EnvironmentFX {
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 
     const mat = new THREE.PointsMaterial({
-      color: 0xf5c842,
-      size:  0.045,
+      color: PALETTE.hex.accentGold,
+      size:  0.035,
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.22, // Soft, non-distracting
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -127,42 +111,34 @@ export class EnvironmentFX {
     this._objects.push(this._dustPoints);
   }
 
-  // ── Update every frame ────────────────────────────────────────────────────
   update(time, dt) {
-    // Falling leaves: drift down and sway
+    // Falling leaves: very slow descent
     if (this._leafPoints) {
       const pos = this._leafPositions;
       const n   = this._leafCount;
       for (let i = 0; i < n; i++) {
         const spd = this._leafSpeeds[i];
         const ph  = this._leafPhases[i];
-        // Fall
         pos[i * 3 + 1] -= spd * dt;
-        // Sway
-        pos[i * 3]     += Math.sin(time * 0.5 + ph) * dt * 0.2;
-        // Respawn at top
-        if (pos[i * 3 + 1] < -10) {
-          pos[i * 3]     = (Math.random() - 0.5) * 24;
-          pos[i * 3 + 1] = 18;
+        pos[i * 3]     += Math.sin(time * 0.2 + ph) * dt * 0.08;
+        if (pos[i * 3 + 1] < -9) {
+          pos[i * 3]     = (Math.random() - 0.5) * 22;
+          pos[i * 3 + 1] = 16;
           pos[i * 3 + 2] = (Math.random() - 0.5) * 10;
         }
       }
       this._leafPoints.geometry.attributes.position.needsUpdate = true;
     }
 
-    // Floating dust: gentle random drift
+    // Floating dust: barely-moving gentle float
     if (this._dustPoints) {
       const pos = this._dustPos;
       const n   = this._dustCount;
       for (let i = 0; i < n; i++) {
         const ph = this._dustPhases[i];
-        pos[i * 3]     += Math.sin(time * 0.3 + ph * 1.3) * dt * 0.08;
-        pos[i * 3 + 1] += Math.cos(time * 0.2 + ph * 0.9) * dt * 0.05;
-        pos[i * 3 + 2] += Math.sin(time * 0.4 + ph * 1.1) * dt * 0.06;
-        // Keep within bounds
-        if (Math.abs(pos[i * 3])     > 7)  pos[i * 3]     *= -0.98;
-        if (pos[i * 3 + 1] > 16 || pos[i * 3 + 1] < -4) pos[i * 3 + 1] *= -0.98;
-        if (Math.abs(pos[i * 3 + 2]) > 4)  pos[i * 3 + 2] *= -0.98;
+        pos[i * 3]     += Math.sin(time * 0.15 + ph) * dt * 0.025;
+        pos[i * 3 + 1] += Math.cos(time * 0.12 + ph) * dt * 0.02;
+        pos[i * 3 + 2] += Math.sin(time * 0.18 + ph) * dt * 0.02;
       }
       this._dustPoints.geometry.attributes.position.needsUpdate = true;
     }
@@ -177,4 +153,3 @@ export class EnvironmentFX {
     });
   }
 }
-

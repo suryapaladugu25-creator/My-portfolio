@@ -1,47 +1,48 @@
-// Lights.js — Warm gold key light + cool blue rim + ambient
+// Lights.js — Warm gold key light + cool dim rim light + subtle ambient
 import * as THREE from 'three';
+import { PALETTE } from '../utils/Palette.js';
 
 export function createLights(scene, device) {
   const lights = {};
 
-  // Ambient — dim night
-  lights.ambient = new THREE.AmbientLight(0x1a1008, 0.6);
+  // Ambient — calm, dim deep background tone
+  lights.ambient = new THREE.AmbientLight(PALETTE.hex.bgGradientMid, 0.55);
   scene.add(lights.ambient);
 
-  // Warm gold key — from above, like a moon or rising sun
-  lights.key = new THREE.DirectionalLight(0xf5c842, 1.8);
-  lights.key.position.set(5, 20, 8);
+  // Warm key light — gentle warm gold (#E6B450), soft intensity
+  lights.key = new THREE.DirectionalLight(PALETTE.hex.accentGold, 1.15);
+  lights.key.position.set(5, 18, 8);
   lights.key.castShadow = !device.isLowEnd;
   if (!device.isLowEnd) {
-    lights.key.shadow.mapSize.width  = 2048;
-    lights.key.shadow.mapSize.height = 2048;
+    lights.key.shadow.mapSize.width  = 1024;
+    lights.key.shadow.mapSize.height = 1024;
     lights.key.shadow.camera.near   = 0.5;
-    lights.key.shadow.camera.far    = 80;
-    lights.key.shadow.camera.left   = -20;
-    lights.key.shadow.camera.right  = 20;
-    lights.key.shadow.camera.top    = 20;
-    lights.key.shadow.camera.bottom = -20;
+    lights.key.shadow.camera.far    = 70;
+    lights.key.shadow.camera.left   = -18;
+    lights.key.shadow.camera.right  = 18;
+    lights.key.shadow.camera.top    = 18;
+    lights.key.shadow.camera.bottom = -18;
   }
   scene.add(lights.key);
 
-  // Cool blue rim — moonlight from behind the tree
-  lights.rim = new THREE.DirectionalLight(0x2244aa, 0.8);
-  lights.rim.position.set(-8, 10, -12);
+  // Cool, dim rim light — soft sky blue (#8FB8E8), not oversaturated
+  lights.rim = new THREE.DirectionalLight(PALETTE.hex.tertiarySky, 0.45);
+  lights.rim.position.set(-8, 12, -12);
   scene.add(lights.rim);
 
-  // Ground fill — very subtle warm bounce
-  lights.fill = new THREE.HemisphereLight(0x1a0a00, 0x0a0506, 0.4);
+  // Ground bounce fill — very quiet dark tone
+  lights.fill = new THREE.HemisphereLight(0x182028, 0x0B0F14, 0.3);
   scene.add(lights.fill);
 
-  // Firefly point lights (up to 6 on hi-end devices, 2 on low-end)
+  // Firefly point lights — reduced count, very subtle warmth
   lights.firePointLights = [];
-  const count = device.isLowEnd ? 2 : 6;
+  const count = device.isLowEnd ? 1 : 3;
   for (let i = 0; i < count; i++) {
-    const pl = new THREE.PointLight(0xf5c842, 0, 8); // intensity 0 — animated
+    const pl = new THREE.PointLight(PALETTE.hex.accentGold, 0.3, 6);
     pl.position.set(
-      (Math.random() - 0.5) * 14,
-      Math.random() * 12 + 1,
-      (Math.random() - 0.5) * 14
+      (Math.random() - 0.5) * 12,
+      Math.random() * 10 + 2,
+      (Math.random() - 0.5) * 12
     );
     scene.add(pl);
     lights.firePointLights.push(pl);
@@ -51,16 +52,10 @@ export function createLights(scene, device) {
 }
 
 export function updateLights(lights, time) {
-  // Animate firefly point lights
+  // Gentle, slow breathing of firefly lights
   lights.firePointLights.forEach((pl, i) => {
-    pl.intensity = (Math.sin(time * 1.4 + i * 1.7) * 0.5 + 0.5) * 1.2;
-    pl.position.x += Math.sin(time * 0.4 + i) * 0.004;
-    pl.position.y += Math.cos(time * 0.5 + i * 0.8) * 0.003;
-    pl.position.z += Math.sin(time * 0.3 + i * 1.2) * 0.004;
+    pl.intensity = 0.2 + (Math.sin(time * 0.5 + i * 1.8) * 0.5 + 0.5) * 0.25;
+    pl.position.x += Math.sin(time * 0.15 + i) * 0.001;
+    pl.position.y += Math.cos(time * 0.2 + i * 0.8) * 0.001;
   });
-
-  // Slowly intensify key light as scroll progresses (driven by updateSkyColor)
-  // Additional breathing effect on ambient
-  lights.ambient.intensity = 0.6 + Math.sin(time * 0.15) * 0.05;
 }
-

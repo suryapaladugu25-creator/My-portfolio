@@ -1,6 +1,6 @@
 /**
  * main.js — Entry point for Surya Portfolio 3D
- * Initialises Three.js, GSAP ScrollTrigger, and all systems.
+ * Refined palette, calm motion, Calm Mode toggle, smooth night→dawn transition
  */
 
 import './style.css';
@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+import { PALETTE }               from './utils/Palette.js';
 import { DeviceDetect }         from './utils/DeviceDetect.js';
 import { LoadingScreen }         from './ui/LoadingScreen.js';
 import { NavbarUI }              from './ui/Navbar.js';
@@ -30,23 +31,31 @@ gsap.registerPlugin(ScrollTrigger);
 const device = new DeviceDetect();
 
 if (device.prefersReducedMotion) {
-  // Simple 2D fallback — no canvas
-  document.getElementById('three-canvas').style.display = 'none';
-  document.getElementById('loading-screen').style.display = 'none';
+  // Simple 2D fallback — no 3D canvas
+  const canvas = document.getElementById('three-canvas');
+  if (canvas) canvas.style.display = 'none';
+  const ls = document.getElementById('loading-screen');
+  if (ls) ls.style.display = 'none';
   document.querySelectorAll('.card-panel').forEach(p => {
-    p.style.position = 'relative';
+    p.style.position = 'static';
     p.style.opacity  = '1';
+    p.style.visibility = 'visible';
     p.style.pointerEvents = 'auto';
   });
-  document.getElementById('cards-overlay').style.position = 'relative';
-  document.getElementById('scroll-proxy').style.display = 'none';
+  const overlay = document.getElementById('cards-overlay');
+  if (overlay) overlay.style.position = 'relative';
+  const proxy = document.getElementById('scroll-proxy');
+  if (proxy) proxy.style.display = 'none';
   initUIOnly();
 } else if (!device.webglSupported) {
-  // Show 2D fallback
-  document.getElementById('no-webgl-banner').style.display = 'block';
-  document.getElementById('fallback-content').style.display = 'flex';
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('cards-overlay').style.display = 'none';
+  const banner = document.getElementById('no-webgl-banner');
+  if (banner) banner.style.display = 'block';
+  const fb = document.getElementById('fallback-content');
+  if (fb) fb.style.display = 'flex';
+  const ls = document.getElementById('loading-screen');
+  if (ls) ls.style.display = 'none';
+  const overlay = document.getElementById('cards-overlay');
+  if (overlay) overlay.style.display = 'none';
   initUIOnly();
 } else {
   init3D();
@@ -55,7 +64,7 @@ if (device.prefersReducedMotion) {
 // ── Full 3D init ─────────────────────────────────────────────────────────────
 async function init3D() {
   const loading = new LoadingScreen();
-  loading.setProgress(5);
+  loading.setProgress(10);
 
   // Core Three.js setup
   const canvas   = document.getElementById('three-canvas');
@@ -65,39 +74,40 @@ async function init3D() {
   const lights   = createLights(scene, device);
   const postFX   = new PostFX(renderer, scene, camCtrl.camera, device);
 
-  loading.setProgress(20);
+  loading.setProgress(30);
 
-  // ── Procedural tree ──
+  // ── Procedural tree with bark and 30% max gold veins ──
   const tree = new TreeGenerator(scene, device);
   tree.generate();
-  loading.setProgress(45);
+  loading.setProgress(55);
 
-  // ── Instanced leaves ──
+  // ── Instanced leaves (emerald shades, gentle sway) ──
   const leaves = new LeavesSystem(scene, tree, device);
-  loading.setProgress(60);
+  loading.setProgress(70);
 
-  // ── Particles ──
+  // ── Particles (60% cut, slow soft drift) ──
   const fireflies = new FirefliesSystem(scene, device);
   const envFX     = new EnvironmentFX(scene, device);
-  loading.setProgress(75);
+  loading.setProgress(85);
 
-  // ── Sections — 3D lanterns/orbs at key points ──
+  // ── Sections — calm lanterns and skill orbs ──
   const sections = new SectionsManager(scene, camCtrl, tree, device);
-  loading.setProgress(90);
+  loading.setProgress(95);
 
   // ── UI ──
   const navbar     = new NavbarUI(camCtrl);
   const cursor     = new CustomCursor();
   const scrollVine = new ScrollVine();
-  initUIOnly(); // form, theme, etc.
+  initUIOnly(postFX, leaves);
   loading.setProgress(100);
 
-  // ── Splash → hero ──
+  // ── Loading screen complete → gentle camera transition to hero ──
   loading.complete(() => {
     sections.showPanel('hero');
     gsap.to(camCtrl.camera.position, {
-      x: 0, y: -5, z: 10,
-      duration: 2.2, ease: 'power3.inOut',
+      x: 0, y: -5.5, z: 12,
+      duration: 1.4,
+      ease: 'power2.out',
     });
   });
 
@@ -117,7 +127,7 @@ async function init3D() {
   });
 
   renderer.domElement.style.pointerEvents = 'auto';
-  renderer.domElement.addEventListener('click', (e) => {
+  renderer.domElement.addEventListener('click', () => {
     raycaster.setFromCamera(mouse, camCtrl.camera);
     const hits = raycaster.intersectObjects(sections.interactives, true);
     if (hits.length > 0) {
@@ -126,19 +136,20 @@ async function init3D() {
     }
   });
 
-  // ── Render loop ──
+  // ── Render loop (steady 60 FPS) ──
   const clock = new THREE.Clock();
   let raf;
 
   function animate() {
     raf = requestAnimationFrame(animate);
     const t  = clock.getElapsedTime();
-    const dt = clock.getDelta ? 0.016 : 0.016; // clamp
+    const dt = 0.016; // steady clamped delta
 
-    // Update all systems
-    tree.update(t);
-    leaves.update(t, dt);
-    fireflies.update(t, dt);
+    // Update all systems gently
+    const prog = camCtrl.scrollProgress;
+    tree.update(t, prog);
+    leaves.update(t);
+    fireflies.update(t);
     envFX.update(t, dt);
     sections.update(t, dt);
     camCtrl.update(dt, mouse);
@@ -156,14 +167,13 @@ async function init3D() {
       hideTooltip(tooltip);
     }
 
-    // Night→dawn sky colour driven by scroll
-    const prog = camCtrl.scrollProgress;
+    // Smooth, subtle night-to-dawn sky color transition
     updateSkyColor(scene, prog);
 
     postFX.render();
   }
 
-  // Pause when tab hidden
+  // Tab hidden pause
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { cancelAnimationFrame(raf); clock.stop(); }
     else { clock.start(); animate(); }
@@ -180,19 +190,21 @@ async function init3D() {
   animate();
 }
 
-// ── Sky colour: night (0) → dawn (0.7+) → golden hour (1) ──────────────────
+// ── Smooth night-to-dawn sky transition ──────────────────────────────────────
+// Deep Night: #0B0F14 → Dawn Sky: #1B2A41 → Soft Warm Glow: #2A2528
 function updateSkyColor(scene, prog) {
-  const night = new THREE.Color(0x060608);
-  const dawn  = new THREE.Color(0x1a0d2e);
-  const gold  = new THREE.Color(0x1a0a00);
+  const night = new THREE.Color(PALETTE.hex.bgDeep);        // #0B0F14
+  const dawn  = new THREE.Color(PALETTE.hex.dawnDark);      // #1B2A41
+  const warmDawn = new THREE.Color(0x231E20);                // soft subtle dark warm
+
   let sky;
-  if (prog < 0.65) {
-    sky = night.clone().lerp(dawn, prog / 0.65);
+  if (prog < 0.60) {
+    sky = night.clone().lerp(dawn, prog / 0.60);
   } else {
-    sky = dawn.clone().lerp(gold, (prog - 0.65) / 0.35);
+    sky = dawn.clone().lerp(warmDawn, (prog - 0.60) / 0.40);
   }
   scene.background = sky;
-  scene.fog.color  = sky;
+  if (scene.fog) scene.fog.color = sky;
 }
 
 // ── Tooltip helpers ──────────────────────────────────────────────────────────
@@ -211,42 +223,55 @@ function showTooltip(el, hit, label) {
   const sy = (-hit.object.position.y + 1) / 2 * window.innerHeight;
   el.textContent = label;
   el.style.left = `${Math.min(sx, window.innerWidth - 180)}px`;
-  el.style.top  = `${Math.max(sy - 40, 10)}px`;
+  el.style.top  = `${Math.max(sy - 35, 15)}px`;
   el.classList.add('tt-visible');
 }
 function hideTooltip(el) { el.classList.remove('tt-visible'); }
 
-// ── UI-only init (forms, theme, navbar — no Three.js) ───────────────────────
-function initUIOnly() {
+// ── UI-only init (forms, theme, calm-mode toggle, navbar) ────────────────────
+function initUIOnly(postFX, leaves) {
   // Theme toggle
   const html      = document.documentElement;
   const themeBtn  = document.getElementById('theme-btn');
   const themeIcon = document.getElementById('theme-icon');
   const saved     = localStorage.getItem('surya-theme') || 'dark';
   html.setAttribute('data-theme', saved);
-  themeIcon.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  if (themeIcon) themeIcon.className = saved === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
   themeBtn?.addEventListener('click', () => {
     const t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', t);
     localStorage.setItem('surya-theme', t);
-    themeIcon.className = t === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    if (themeIcon) themeIcon.className = t === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
   });
 
-  // Reduce 3D toggle
-  document.getElementById('reduce-3d-btn')?.addEventListener('click', () => {
-    document.body.classList.toggle('reduced-3d');
-    // Signals to all systems via a flag
-    window.__reduce3d = document.body.classList.contains('reduced-3d');
-  });
+  // Calm Mode toggle (visible in nav)
+  const calmBtn = document.getElementById('calm-mode-btn') || document.getElementById('reduce-3d-btn');
+  if (calmBtn) {
+    const isCalmStored = localStorage.getItem('surya-calm-mode') === 'true';
+    if (isCalmStored) {
+      document.body.classList.add('calm-mode');
+      calmBtn.classList.add('is-active');
+      window.__calmMode = true;
+      postFX?.setCalm?.(true);
+      leaves?.setCalm?.(true);
+    }
+    calmBtn.addEventListener('click', () => {
+      const active = document.body.classList.toggle('calm-mode');
+      calmBtn.classList.toggle('is-active', active);
+      window.__calmMode = active;
+      localStorage.setItem('surya-calm-mode', String(active));
+      postFX?.setCalm?.(active);
+      leaves?.setCalm?.(active);
+    });
+  }
 
-  // Sound toggle (stub — no audio files shipped, structure ready)
+  // Sound toggle (stub)
   let soundOn = false;
-  document.getElementById('sound-btn')?.addEventListener('click', () => {
+  const soundBtn = document.getElementById('sound-btn');
+  soundBtn?.addEventListener('click', () => {
     soundOn = !soundOn;
-    document.getElementById('sound-btn').innerHTML =
-      soundOn ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
-    document.getElementById('sound-btn').title = soundOn ? 'Sound (On)' : 'Sound (Off)';
-    // window.__soundOn = soundOn; (hook into audio system)
+    soundBtn.innerHTML = soundOn ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+    soundBtn.title = soundOn ? 'Sound (On)' : 'Sound (Off)';
   });
 
   // Mobile hamburger
@@ -258,13 +283,13 @@ function initUIOnly() {
     hamburger.setAttribute('aria-expanded', String(open));
   });
   document.querySelectorAll('.nb-link').forEach(l => l.addEventListener('click', () => {
-    nbLinks.classList.remove('nb-open');
-    hamburger.classList.remove('open');
+    nbLinks?.classList.remove('nb-open');
+    hamburger?.classList.remove('open');
   }));
 
-  // Nav scroll shadow
+  // Nav scroll border
   window.addEventListener('scroll', () => {
-    document.getElementById('navbar')?.classList.toggle('nb-scrolled', window.scrollY > 10);
+    document.getElementById('navbar')?.classList.toggle('nb-scrolled', window.scrollY > 20);
   }, { passive: true });
 
   // Contact form
@@ -274,8 +299,7 @@ function initUIOnly() {
   document.querySelectorAll('[data-fly]').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.fly;
-      window.__camFlyTo?.(target); // hooked by CameraController
-      document.getElementById(`${target}-section`)?.scrollIntoView({ behavior: 'smooth' });
+      window.__camFlyTo?.(target);
     });
   });
 
@@ -316,17 +340,18 @@ function initContactForm() {
     if (!okN || !okE || !okM) return;
     submitBtn.disabled = true;
     label.textContent  = 'Sending…';
-    icon.style.display = 'none';
-    spin.style.display = 'inline-block';
-    await new Promise(r => setTimeout(r, 1400));
+    if (icon) icon.style.display = 'none';
+    if (spin) spin.style.display = 'inline-block';
+    await new Promise(r => setTimeout(r, 1000));
     submitBtn.disabled = false;
     label.textContent  = 'Send Message';
-    icon.style.display = 'inline-block';
-    spin.style.display = 'none';
-    toast.className    = 'cf-toast ok';
-    toast.textContent  = '🌟 Message sent! I\'ll get back to you soon.';
-    form.reset();
-    setTimeout(() => { toast.style.display = 'none'; }, 6000);
+    if (icon) icon.style.display = 'inline-block';
+    if (spin) spin.style.display = 'none';
+    if (toast) {
+      toast.className    = 'cf-toast ok';
+      toast.textContent  = 'Message sent! I\'ll get back to you soon.';
+      form.reset();
+      setTimeout(() => { toast.style.display = 'none'; }, 5000);
+    }
   });
 }
-

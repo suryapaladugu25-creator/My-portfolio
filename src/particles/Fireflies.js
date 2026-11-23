@@ -1,25 +1,27 @@
 /**
- * Fireflies.js — Particle system of drifting gold fireflies with point-light effect.
- * Uses a custom shader for glowing soft discs.
+ * Fireflies.js — Soft, slow-drifting gold fireflies (cut count ~60%, calm motion)
  */
 import * as THREE from 'three';
+import { PALETTE } from '../utils/Palette.js';
 
 const FF_VERT = `
   attribute float aPhase;
   attribute float aSpeed;
   uniform float uTime;
-  varying float vBright;
+  varying float vAlpha;
 
   void main() {
-    // Each firefly orbits on a Lissajous-like path
+    // Very slow drift (no fast orbital swings)
     vec3 pos = position;
-    pos.x += sin(uTime * aSpeed       + aPhase * 6.28) * 1.2;
-    pos.y += cos(uTime * aSpeed * 0.7 + aPhase * 3.14) * 0.9;
-    pos.z += sin(uTime * aSpeed * 0.5 + aPhase * 2.0 ) * 1.1;
+    pos.x += sin(uTime * aSpeed * 0.35 + aPhase * 6.28) * 0.45;
+    pos.y += cos(uTime * aSpeed * 0.28 + aPhase * 3.14) * 0.35;
+    pos.z += sin(uTime * aSpeed * 0.22 + aPhase * 2.0 ) * 0.40;
 
-    vBright = 0.4 + 0.6 * abs(sin(uTime * 1.4 + aPhase * 5.0));
+    // Slow, soft breathing alpha (0.25 to 0.65)
+    vAlpha = 0.25 + 0.4 * (sin(uTime * 0.6 + aPhase * 4.0) * 0.5 + 0.5);
+
     vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = vBright * 6.0 * (280.0 / -mvPos.z);
+    gl_PointSize = (18.0 / -mvPos.z);
     gl_Position  = projectionMatrix * mvPos;
   }
 `;
@@ -27,30 +29,31 @@ const FF_VERT = `
 const FF_FRAG = `
   precision mediump float;
   uniform vec3 uColor;
-  varying float vBright;
+  varying float vAlpha;
 
   void main() {
     float d = length(gl_PointCoord - 0.5) * 2.0;
-    float circle = 1.0 - smoothstep(0.3, 1.0, d);
+    float circle = 1.0 - smoothstep(0.2, 1.0, d);
     if (circle < 0.01) discard;
-    gl_FragColor = vec4(uColor * vBright, circle * vBright);
+    gl_FragColor = vec4(uColor, circle * vAlpha);
   }
 `;
 
 export class FirefliesSystem {
   constructor(scene, device) {
-    const count = device.isLowEnd ? 40 : 120;
+    // 60% reduction: 16 (low-end) / 48 (standard) vs previous 40 / 120
+    const count = device.isLowEnd ? 16 : 48;
 
     const positions = new Float32Array(count * 3);
     const phases    = new Float32Array(count);
     const speeds    = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      positions[i*3]   = (Math.random() - 0.5) * 20;
-      positions[i*3+1] =  Math.random() * 18 - 2;
-      positions[i*3+2] = (Math.random() - 0.5) * 20;
+      positions[i * 3]     = (Math.random() - 0.5) * 16;
+      positions[i * 3 + 1] =  Math.random() * 16 - 2;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
       phases[i] = Math.random();
-      speeds[i] = 0.3 + Math.random() * 0.6;
+      speeds[i] = 0.15 + Math.random() * 0.25; // slow speeds
     }
 
     const geo = new THREE.BufferGeometry();
@@ -61,7 +64,7 @@ export class FirefliesSystem {
     this.mat = new THREE.ShaderMaterial({
       uniforms: {
         uTime:  { value: 0 },
-        uColor: { value: new THREE.Color(0xf5c842) },
+        uColor: { value: new THREE.Color(PALETTE.hex.accentGold) },
       },
       vertexShader:   FF_VERT,
       fragmentShader: FF_FRAG,
@@ -78,4 +81,3 @@ export class FirefliesSystem {
     this.mat.uniforms.uTime.value = time;
   }
 }
-

@@ -1,47 +1,33 @@
-// PostProcessing.js — Bloom, vignette, film grain, depth-of-field (lite on mobile)
+// PostProcessing.js — Subtle bloom, high threshold, no film grain or screen shake
 import * as THREE from 'three';
 import { EffectComposer }   from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass }       from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass }  from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { ShaderPass }       from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { FilmPass }         from 'three/examples/jsm/postprocessing/FilmPass.js';
 
-// Custom vignette + film grain GLSL pass
-const VignetteGrainShader = {
+// Extremely subtle, clean vignette only — zero film noise, zero grain jitter
+const SoftVignetteShader = {
   uniforms: {
     tDiffuse:   { value: null },
-    uTime:      { value: 0 },
-    uVigOffset: { value: 0.6 },
-    uVigDark:   { value: 1.0 },
-    uGrain:     { value: 0.04 },
+    uVigOffset: { value: 0.8 },
+    uVigDark:   { value: 0.35 },
   },
   vertexShader: `
     varying vec2 vUv;
-    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }
+    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
   `,
   fragmentShader: `
     uniform sampler2D tDiffuse;
-    uniform float uTime;
     uniform float uVigOffset;
     uniform float uVigDark;
-    uniform float uGrain;
     varying vec2 vUv;
-
-    float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898,78.233))) * 43758.5453); }
 
     void main() {
       vec4 col = texture2D(tDiffuse, vUv);
-
-      // Vignette
       vec2 uv2 = vUv * (1.0 - vUv.yx);
       float vig = uv2.x * uv2.y * 15.0;
-      vig = pow(vig, uVigOffset);
+      vig = pow(clamp(vig, 0.0, 1.0), uVigOffset);
       col.rgb *= mix(1.0 - uVigDark, 1.0, vig);
-
-      // Film grain
-      float grain = rand(vUv + fract(uTime * 0.017)) * uGrain;
-      col.rgb += (grain - uGrain * 0.5);
-
       gl_FragColor = col;
     }
   `,
@@ -55,32 +41,31 @@ export class PostFX {
     this.composer = new EffectComposer(renderer);
     this.composer.addPass(new RenderPass(scene, camera));
 
-    // Bloom — gold glow
+    // Bloom — subtle, gentle glow (0.35 - 0.45) with higher threshold (0.85)
+    // so only true accent lights glow, not everything
     const bloom = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      device.isLowEnd ? 0.6 : 1.2,  // strength
-      0.5,                           // radius
-      device.isLowEnd ? 0.9 : 0.75  // threshold
+      device.isLowEnd ? 0.25 : 0.38,  // gentle strength
+      0.4,                            // radius
+      0.86                            // threshold - high so only accents glow
     );
     this.composer.addPass(bloom);
     this.bloom = bloom;
 
-    // Film grain + vignette
+    // Soft smooth vignette pass (no grain)
     if (!device.isLowEnd) {
-      const vigPass = new ShaderPass(VignetteGrainShader);
+      const vigPass = new ShaderPass(SoftVignetteShader);
       this.composer.addPass(vigPass);
-      this.vigPass = vigPass;
     }
+  }
 
-    // Subtle film noise (scanlines = 0, grayscale = false, nointensity = 0)
-    if (!device.isLowEnd) {
-      const film = new FilmPass(0.25, false);
-      this.composer.addPass(film);
+  setCalm(isCalm) {
+    if (this.bloom) {
+      this.bloom.strength = isCalm ? 0.2 : (this.device.isLowEnd ? 0.25 : 0.38);
     }
   }
 
   render() {
-    if (this.vigPass) this.vigPass.uniforms.uTime.value = performance.now() * 0.001;
     this.composer.render();
   }
 
@@ -89,4 +74,3 @@ export class PostFX {
     this.bloom.resolution.set(window.innerWidth, window.innerHeight);
   }
 }
-

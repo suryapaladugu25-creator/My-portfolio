@@ -1,22 +1,17 @@
 /**
  * TreeGenerator.js
- * Procedural L-system style recursive tree with:
- *  - Tapering TubeGeometry branches
- *  - Custom gold-vein shader on trunk
- *  - Tip positions exported for skill leaves, project lanterns, etc.
- *  - Slight random variation each visit
+ * Procedural tree with bark (#3B2B20) and gold veins at 30% opacity max.
  */
 import * as THREE from 'three';
+import { PALETTE } from '../utils/Palette.js';
 
 // ── Gold vein shader for trunk ───────────────────────────────────────────────
 const TRUNK_VERT = `
   varying vec2 vUv;
   varying vec3 vNormal;
-  varying vec3 vWorldPos;
   void main() {
     vUv       = uv;
     vNormal   = normalize(normalMatrix * normal);
-    vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
@@ -26,11 +21,11 @@ const TRUNK_FRAG = `
   uniform float uTime;
   uniform float uScrollProg;
   uniform vec3  uGold;
+  uniform vec3  uBark;
   varying vec2  vUv;
   varying vec3  vNormal;
-  varying vec3  vWorldPos;
 
-  /* cheap 2D value noise */
+  /* 2D noise for organic veins */
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
   float noise(vec2 p) {
     vec2 i = floor(p), f = fract(p);
@@ -40,44 +35,45 @@ const TRUNK_FRAG = `
   }
 
   void main() {
-    /* dark bark base */
-    vec3 bark = vec3(0.10, 0.065, 0.028);
+    /* Bark base: #3B2B20 */
+    vec3 bark = uBark;
 
-    /* circuit-like gold veins */
-    float v1 = noise(vUv * vec2(3.0, 18.0));
-    float v2 = noise(vUv * vec2(2.0, 12.0) + 3.7);
-    float vein = pow(max(v1, v2), 5.0);
+    /* Circuit/tree veins */
+    float v1 = noise(vUv * vec2(2.5, 14.0));
+    float v2 = noise(vUv * vec2(1.8, 10.0) + 3.2);
+    float vein = pow(max(v1, v2), 4.5);
 
-    /* travelling pulse along y */
-    float pulse = smoothstep(0.3, 0.7, sin(vUv.y * 25.0 - uTime * 2.2) * 0.5 + 0.5);
+    /* Slow pulse along y (no rushing or flashing) */
+    float pulse = smoothstep(0.2, 0.8, sin(vUv.y * 18.0 - uTime * 0.8) * 0.5 + 0.5);
     float grow  = smoothstep(0.0, 1.0, uScrollProg);
 
-    vec3 color = mix(bark, uGold, vein * pulse * grow * 0.85);
+    /* Gold veins at only 30% max opacity */
+    float veinIntensity = vein * (0.15 + 0.15 * pulse) * grow;
+    vec3 color = mix(bark, uGold, clamp(veinIntensity, 0.0, 0.30));
 
-    /* soft fresnel rim */
-    float rim = 1.0 - max(dot(vNormal, vec3(0,0,1)), 0.0);
-    color += uGold * rim * 0.07;
+    /* Very subtle edge definition */
+    float rim = 1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0);
+    color += uGold * rim * 0.03;
 
     gl_FragColor = vec4(color, 1.0);
   }
 `;
 
-// ── Branch material (simple bark) ────────────────────────────────────────────
 function makeBranchMat() {
   return new THREE.MeshStandardMaterial({
-    color:     0x2d1a09,
-    roughness: 0.92,
-    metalness: 0.04,
+    color:     PALETTE.hex.barkTrunk, // #3B2B20
+    roughness: 0.94,
+    metalness: 0.02,
   });
 }
 
-// ── Shared trunk shader material ──────────────────────────────────────────────
 function makeTrunkMat() {
   return new THREE.ShaderMaterial({
     uniforms: {
       uTime:       { value: 0 },
       uScrollProg: { value: 0 },
-      uGold:       { value: new THREE.Color(0xf5c842) },
+      uGold:       { value: new THREE.Color(PALETTE.hex.accentGold) },
+      uBark:       { value: new THREE.Color(PALETTE.hex.barkTrunk) },
     },
     vertexShader:   TRUNK_VERT,
     fragmentShader: TRUNK_FRAG,
@@ -97,137 +93,96 @@ export class TreeGenerator {
     scene.add(this.trunkGroup);
     scene.add(this.branchGroup);
 
-    this.tipPositions = []; // used for leaves / lanterns
-    this._branchData  = []; // { start, end, radius, depth, isTrunk }
-  }
-
-  // ── Public API ─────────────────────────────────────────────────────────────
-  generate() {
-    const maxDepth = this.device.isLowEnd ? 5 : 7;
-    this._branchData = [];
     this.tipPositions = [];
-
-    // Seed slightly different each visit
-    this._rng = this._makeRNG(Date.now() % 9973 + 1);
-
-    // Trunk starts below ground (roots hidden by mist)
-    this._recurse(
-      new THREE.Vector3(0, -8, 0),
-      new THREE.Vector3(0,  1, 0),
-      18,          // trunk height
-      0.9,         // radius multiplier (absolute radius = mult * 0.08 in mesh)
-      maxDepth,
-      true
-    );
-
-    // Build meshes
-    this._branchData.forEach((b, i) => this._buildMesh(b, i));
-
-    // Ground plane (mist reference)
-    const groundGeo = new THREE.CircleGeometry(30, 32);
-    const groundMat = new THREE.MeshStandardMaterial({
-      color: 0x060400, roughness: 1, metalness: 0,
-      transparent: true, opacity: 0.8,
-    });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -8;
-    ground.receiveShadow = true;
-    this.scene.add(ground);
   }
 
-  getTrunkTopY() { return 10; } // approx top of trunk in world space
-
-  update(time) {
-    this.trunkMat.uniforms.uTime.value = time;
-    // Scroll progress hooked externally via updateScrollProg
+  generate() {
+    this._buildTrunk();
+    this._buildBranches();
   }
 
-  updateScrollProg(prog) {
-    this.trunkMat.uniforms.uScrollProg.value = prog;
-  }
+  _buildTrunk() {
+    // Smooth CatmullRom curve for tapering trunk
+    const points = [
+      new THREE.Vector3( 0.0, -8.0,  0.0),
+      new THREE.Vector3( 0.2, -4.0,  0.1),
+      new THREE.Vector3(-0.2,  0.0, -0.1),
+      new THREE.Vector3( 0.1,  4.0,  0.2),
+      new THREE.Vector3(-0.1,  8.0,  0.0),
+      new THREE.Vector3( 0.0, 12.0, -0.1),
+      new THREE.Vector3( 0.1, 16.0,  0.0),
+      new THREE.Vector3( 0.0, 20.0,  0.0),
+      new THREE.Vector3( 0.0, 24.0,  0.0),
+    ];
+    const curve = new THREE.CatmullRomCurve3(points);
+    const tubeGeo = new THREE.TubeGeometry(curve, 64, 0.9, 12, false);
 
-  // ── Private: recursive branching ──────────────────────────────────────────
-  _recurse(start, dir, length, radius, depth, isTrunk) {
-    if (depth <= 0 || length < 0.25) return;
-
-    // Slight organic wander
-    const wanderDir = dir.clone().add(
-      new THREE.Vector3(
-        (this._rng() - 0.5) * 0.25,
-        0,
-        (this._rng() - 0.5) * 0.25
-      )
-    ).normalize();
-
-    const end = start.clone().addScaledVector(wanderDir, length);
-    this._branchData.push({ start: start.clone(), end: end.clone(), radius, depth, isTrunk });
-
-    if (depth === 1) {
-      // Leaf tip
-      this.tipPositions.push(end.clone());
-      return;
+    // Taper trunk along height
+    const pos = tubeGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i);
+      const factor = Math.max(0.18, 1.0 - (y + 8) / 36);
+      pos.setX(i, pos.getX(i) * factor);
+      pos.setZ(i, pos.getZ(i) * factor);
     }
+    pos.needsUpdate = true;
+    tubeGeo.computeVertexNormals();
 
-    const childCount = isTrunk
-      ? (depth > 5 ? 1 : 3)   // trunk grows mostly straight then splits
-      : 2;
-    const childLen  = length  * (0.58 + this._rng() * 0.14);
-    const childRad  = radius  * 0.65;
+    const trunkMesh = new THREE.Mesh(tubeGeo, this.trunkMat);
+    trunkMesh.castShadow    = !this.device.isLowEnd;
+    trunkMesh.receiveShadow = !this.device.isLowEnd;
+    this.trunkGroup.add(trunkMesh);
+  }
 
-    for (let i = 0; i < childCount; i++) {
-      const baseAngleY = isTrunk && depth > 5
-        ? Math.PI * 2 * (i / childCount)
-        : Math.PI * 2 * (i / childCount) + this._rng() * 0.4;
-      const tiltAngle = isTrunk && depth > 5
-        ? 0.08
-        : (0.3 + this._rng() * 0.4);
+  _buildBranches() {
+    const branchConfigs = [
+      // yBase, angle, length, radius, tiltUp
+      { y:  2.0, angle: 0.2,              len: 3.8, r: 0.35, tilt: 0.4 },
+      { y:  3.5, angle: Math.PI * 0.65,    len: 4.2, r: 0.32, tilt: 0.35 },
+      { y:  5.0, angle: Math.PI * 1.3,     len: 4.0, r: 0.30, tilt: 0.45 },
+      { y:  7.0, angle: Math.PI * 0.15,    len: 4.5, r: 0.28, tilt: 0.4 },
+      { y:  8.5, angle: Math.PI * 0.85,    len: 4.2, r: 0.26, tilt: 0.5 },
+      { y: 10.0, angle: Math.PI * 1.55,    len: 4.6, r: 0.24, tilt: 0.45 },
+      { y: 12.0, angle: Math.PI * 0.4,     len: 4.0, r: 0.22, tilt: 0.55 },
+      { y: 13.5, angle: Math.PI * 1.1,     len: 3.8, r: 0.20, tilt: 0.5 },
+      { y: 15.0, angle: Math.PI * 1.8,     len: 3.5, r: 0.18, tilt: 0.6 },
+      { y: 17.0, angle: Math.PI * 0.55,    len: 3.2, r: 0.16, tilt: 0.65 },
+      { y: 19.0, angle: Math.PI * 1.25,    len: 2.8, r: 0.14, tilt: 0.7 },
+      { y: 21.0, angle: Math.PI * 0.1,     len: 2.4, r: 0.12, tilt: 0.75 },
+    ];
 
-      const childDir = new THREE.Vector3(
-        Math.sin(tiltAngle) * Math.cos(baseAngleY),
-        Math.cos(tiltAngle),
-        Math.sin(tiltAngle) * Math.sin(baseAngleY)
+    branchConfigs.forEach(cfg => {
+      const start = new THREE.Vector3(0, cfg.y, 0);
+      const dir = new THREE.Vector3(
+        Math.cos(cfg.angle),
+        cfg.tilt,
+        Math.sin(cfg.angle)
       ).normalize();
 
-      this._recurse(end.clone(), childDir, childLen, childRad, depth - 1, false);
+      const mid = start.clone().add(dir.clone().multiplyScalar(cfg.len * 0.5));
+      mid.x += (Math.random() - 0.5) * 0.4;
+      mid.z += (Math.random() - 0.5) * 0.4;
+
+      const end = start.clone().add(dir.clone().multiplyScalar(cfg.len));
+      end.y += 0.3;
+
+      const curve = new THREE.CatmullRomCurve3([start, mid, end]);
+      const geo = new THREE.TubeGeometry(curve, 16, cfg.r, 8, false);
+
+      const mesh = new THREE.Mesh(geo, this.branchMat);
+      mesh.castShadow = !this.device.isLowEnd;
+      this.branchGroup.add(mesh);
+
+      this.tipPositions.push(end);
+    });
+  }
+
+  update(time, scrollProg) {
+    if (this.trunkMat && this.trunkMat.uniforms) {
+      this.trunkMat.uniforms.uTime.value = time;
+      if (scrollProg !== undefined) {
+        this.trunkMat.uniforms.uScrollProg.value = scrollProg;
+      }
     }
   }
-
-  // ── Build tube geometry for one branch ────────────────────────────────────
-  _buildMesh(branch, idx) {
-    const { start, end, radius, isTrunk } = branch;
-
-    // Mid-point displacement for organic curve
-    const mid = start.clone().lerp(end, 0.5).add(
-      new THREE.Vector3(
-        (this._rng() - 0.5) * 0.4,
-        0,
-        (this._rng() - 0.5) * 0.4
-      )
-    );
-
-    const path = new THREE.CatmullRomCurve3([start, mid, end]);
-    const seg  = isTrunk ? 14 : 7;
-    const rad  = isTrunk ? 8  : 6;
-    const r    = Math.max(radius * 0.09, 0.015);
-
-    const geo  = new THREE.TubeGeometry(path, seg, r, rad, false);
-    const mat  = isTrunk ? this.trunkMat : this.branchMat;
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.castShadow    = !this.device.isLowEnd;
-    mesh.receiveShadow = !this.device.isLowEnd;
-
-    if (isTrunk) this.trunkGroup.add(mesh);
-    else         this.branchGroup.add(mesh);
-  }
-
-  // ── Seeded LCG RNG so the shape varies each visit ────────────────────────
-  _makeRNG(seed) {
-    let s = seed;
-    return () => {
-      s = (s * 1664525 + 1013904223) & 0xffffffff;
-      return (s >>> 0) / 0xffffffff;
-    };
-  }
 }
-

@@ -127,13 +127,45 @@
   width: 0;
 }
 
-/* GTA Vice Sunset Gradient */
+/* GTA Vice Sunset & Daylight Gradients */
 .vice-sunset-gradient {
   background: linear-gradient(180deg, #0D0418 0%, #300A38 30%, #7B114D 60%, #FF007F 80%, #FF5400 95%, #FFDE59 100%);
 }
 
+.vice-daylight-gradient {
+  background: linear-gradient(180deg, #C7D2FE 0%, #DDD6FE 25%, #FCE7F3 50%, #FED7AA 75%, #FEE2E2 100%);
+}
+
 .vice-skyline-gradient {
   background: linear-gradient(180deg, rgba(13,4,24,0) 0%, rgba(123,17,77,0.4) 60%, rgba(255,0,127,0.8) 100%);
+}
+
+.vice-skyline-daylight-gradient {
+  background: linear-gradient(180deg, rgba(221,214,254,0) 0%, rgba(252,231,243,0.5) 60%, rgba(254,215,170,0.8) 100%);
+}
+
+/* Light Mode Halftone Variant */
+.light .halftone-overlay {
+  background-image: radial-gradient(rgba(157, 0, 255, 0.08) 1px, transparent 1px),
+                    radial-gradient(rgba(255, 0, 127, 0.08) 1px, transparent 1px);
+}
+
+.light .halftone-dense {
+  background-image: radial-gradient(rgba(21, 21, 47, 0.1) 1.5px, transparent 1.5px);
+}
+
+/* Light Mode Comic Paper Texture */
+.light .comic-scanlines {
+  background: linear-gradient(
+    rgba(245, 243, 255, 0) 50%, 
+    rgba(21, 21, 47, 0.03) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 127, 0.015),
+    rgba(0, 240, 255, 0.01),
+    rgba(157, 0, 255, 0.015)
+  );
+  background-size: 100% 3px, 6px 100%;
 }
 
 /* Custom Scrollbar */
@@ -142,6 +174,9 @@
 }
 ::-webkit-scrollbar-track {
   background: #0A0612;
+}
+.light ::-webkit-scrollbar-track {
+  background: #EDE9FE;
 }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #FF007F, #00F0FF);

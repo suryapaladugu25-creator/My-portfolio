@@ -99,7 +99,7 @@ export const ProjectsSection: React.FC = () => {
   return (
     <section id="projects" className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto z-10">
       {/* Chapter Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12 bg-[#0E061B]/85 p-5 rounded-lg border-2 border-vice-pink shadow-[6px_6px_0px_#FFDE59]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12 bg-white/95 dark:bg-[#0E061B]/85 p-5 rounded-lg border-2 border-vice-pink shadow-[6px_6px_0px_#FFDE59] transition-colors duration-300">
         <div>
           <div className="flex items-center gap-2">
             <span className="bg-vice-cyan text-black font-bangers text-lg px-2.5 py-0.5 border-2 border-black">
@@ -109,12 +109,12 @@ export const ProjectsSection: React.FC = () => {
               // CLASSIFIED MISSIONS ARCHIVE
             </span>
           </div>
-          <h2 className="text-4xl sm:text-6xl font-bangers tracking-wider text-white mt-1">
+          <h2 className="text-4xl sm:text-6xl font-bangers tracking-wider text-[#15152F] dark:text-white mt-1 transition-colors duration-300">
             FEATURED <span className="text-vice-pink">MISSIONS & CODE</span>
           </h2>
         </div>
-        <div className="text-left sm:text-right font-mono text-xs text-zinc-300">
-          <span className="text-vice-yellow font-bold">STATUS:</span> ALL SYSTEMS DEPLOYED & TESTED
+        <div className="text-left sm:text-right font-mono text-xs text-purple-950 dark:text-zinc-300">
+          <span className="text-amber-600 dark:text-vice-yellow font-bold">STATUS:</span> ALL SYSTEMS DEPLOYED & TESTED
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export const ProjectsSection: React.FC = () => {
             key={project.id}
             whileHover={{ y: -8, scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="bg-[#120723] rounded-2xl border-4 border-black overflow-hidden flex flex-col justify-between group relative"
+            className="bg-white dark:bg-[#120723] rounded-2xl border-4 border-black overflow-hidden flex flex-col justify-between group relative transition-colors duration-300"
             style={{
               boxShadow: `8px 8px 0px ${project.accentColor}`,
             }}
@@ -164,19 +164,19 @@ export const ProjectsSection: React.FC = () => {
             </div>
 
             {/* Bottom Content Body */}
-            <div className="p-6 flex-1 flex flex-col justify-between bg-[#110820]">
+            <div className="p-6 flex-1 flex flex-col justify-between bg-white dark:bg-[#110820] transition-colors duration-300">
               <div>
-                <p className="text-zinc-200 text-sm leading-relaxed font-sans mb-4">
+                <p className="text-[#2D2D44] dark:text-zinc-200 text-sm leading-relaxed font-sans mb-4 transition-colors duration-300">
                   {project.description}
                 </p>
 
                 {/* Key Mission Intel */}
-                <div className="space-y-1.5 mb-5 bg-[#090314] p-3 rounded-lg border border-zinc-800">
-                  <div className="font-mono text-[11px] text-vice-yellow font-bold uppercase tracking-wider mb-1">
+                <div className="space-y-1.5 mb-5 bg-purple-50 dark:bg-[#090314] p-3 rounded-lg border border-purple-200 dark:border-zinc-800 transition-colors duration-300">
+                  <div className="font-mono text-[11px] text-amber-600 dark:text-vice-yellow font-bold uppercase tracking-wider mb-1">
                     KEY MISSION INTEL:
                   </div>
                   {project.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                    <div key={idx} className="flex items-center gap-2 text-xs font-mono text-purple-950 dark:text-zinc-300">
                       <span className="text-vice-pink">▶</span>
                       <span>{feat}</span>
                     </div>
@@ -188,7 +188,7 @@ export const ProjectsSection: React.FC = () => {
                   {project.tech.map((t) => (
                     <span
                       key={t}
-                      className="font-mono text-xs px-2.5 py-1 rounded bg-[#1B0D33] text-zinc-200 border border-zinc-700"
+                      className="font-mono text-xs px-2.5 py-1 rounded bg-purple-100 dark:bg-[#1B0D33] text-purple-950 dark:text-zinc-200 border border-purple-200 dark:border-zinc-700 transition-colors duration-300"
                     >
                       {t}
                     </span>
@@ -197,7 +197,7 @@ export const ProjectsSection: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3 pt-3 border-t border-zinc-800">
+              <div className="flex items-center gap-3 pt-3 border-t border-purple-200 dark:border-zinc-800 transition-colors duration-300">
                 <a
                   href={project.liveUrl}
                   target="_blank"
@@ -212,7 +212,7 @@ export const ProjectsSection: React.FC = () => {
                   href={project.githubUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="p-2.5 bg-[#1B0F33] text-white border-2 border-black shadow-[3px_3px_0px_#000] hover:bg-vice-pink hover:text-black transition-all"
+                  className="p-2.5 bg-purple-100 dark:bg-[#1B0F33] text-purple-950 dark:text-white border-2 border-black shadow-[3px_3px_0px_#000] hover:bg-vice-pink hover:text-black transition-all"
                   title="Source Code"
                 >
                   <GithubIcon className="w-5 h-5" />

@@ -54,23 +54,23 @@ export const ContactSection: React.FC = () => {
   return (
     <section id="contact" className="relative py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto z-10">
       {/* Chapter Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12 bg-[#120722]/85 p-5 rounded-lg border-2 border-vice-pink shadow-[6px_6px_0px_#FFDE59]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12 bg-white/95 dark:bg-[#120722]/85 p-5 rounded-lg border-2 border-vice-pink shadow-[6px_6px_0px_#FFDE59] transition-colors duration-300">
         <div>
           <div className="flex items-center gap-2">
             <span className="bg-vice-pink text-black font-bangers text-lg px-2.5 py-0.5 border-2 border-black">
               ISSUE #06
             </span>
-            <span className="text-vice-cyan font-mono text-sm uppercase tracking-widest font-bold">
+            <span className="text-sky-600 dark:text-vice-cyan font-mono text-sm uppercase tracking-widest font-bold">
               // SECURE TRANSMISSION CHANNEL
             </span>
           </div>
-          <h2 className="text-4xl sm:text-6xl font-bangers tracking-wider text-white mt-1">
-            RADIO SURYA: <span className="text-vice-yellow">DISPATCH HQ</span>
+          <h2 className="text-4xl sm:text-6xl font-bangers tracking-wider text-[#15152F] dark:text-white mt-1 transition-colors duration-300">
+            RADIO SURYA: <span className="text-amber-500 dark:text-vice-yellow">DISPATCH HQ</span>
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-500/40 px-3 py-1.5 rounded-full">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <div className="flex items-center gap-2 font-mono text-xs text-emerald-800 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/40 px-3 py-1.5 rounded-full transition-colors duration-300">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
           FREQUENCY ACTIVE: 24/7 OPEN FOR OPPORTUNITIES
         </div>
       </div>
@@ -88,18 +88,18 @@ export const ContactSection: React.FC = () => {
           </div>
 
           {/* Quick Direct Channels Card */}
-          <div className="mt-8 w-full bg-[#140A28] rounded-xl border-3 border-black p-5 shadow-[5px_5px_0px_#00F0FF] space-y-3 font-mono text-xs">
-            <div className="flex items-center gap-3 text-zinc-200">
+          <div className="mt-8 w-full bg-white dark:bg-[#140A28] rounded-xl border-3 border-black p-5 shadow-[5px_5px_0px_#00F0FF] space-y-3 font-mono text-xs transition-colors duration-300">
+            <div className="flex items-center gap-3 text-[#2D2D44] dark:text-zinc-200">
               <Mail className="w-4 h-4 text-vice-pink" />
-              <span>EMAIL: <strong className="text-white">surya@example.com</strong></span>
+              <span>EMAIL: <strong className="text-[#15152F] dark:text-white">surya@example.com</strong></span>
             </div>
-            <div className="flex items-center gap-3 text-zinc-200">
-              <MapPin className="w-4 h-4 text-vice-cyan" />
-              <span>HQ BASE: <strong className="text-white">Newton School of Technology</strong></span>
+            <div className="flex items-center gap-3 text-[#2D2D44] dark:text-zinc-200">
+              <MapPin className="w-4 h-4 text-sky-600 dark:text-vice-cyan" />
+              <span>HQ BASE: <strong className="text-[#15152F] dark:text-white">Newton School of Technology</strong></span>
             </div>
-            <div className="flex items-center gap-3 text-zinc-200">
-              <MessageSquare className="w-4 h-4 text-vice-yellow" />
-              <span>RESPONSE TIME: <strong className="text-vice-yellow">Within 24 Hours</strong></span>
+            <div className="flex items-center gap-3 text-[#2D2D44] dark:text-zinc-200">
+              <MessageSquare className="w-4 h-4 text-amber-600 dark:text-vice-yellow" />
+              <span>RESPONSE TIME: <strong className="text-amber-600 dark:text-vice-yellow">Within 24 Hours</strong></span>
             </div>
 
             <div className="pt-2 flex items-center gap-2">
@@ -107,7 +107,7 @@ export const ContactSection: React.FC = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 text-center py-2 bg-[#20103C] hover:bg-vice-pink hover:text-black font-bangers tracking-wider text-sm border-2 border-black rounded transition-colors text-white"
+                className="flex-1 text-center py-2 bg-purple-100 dark:bg-[#20103C] hover:bg-vice-pink hover:text-black font-bangers tracking-wider text-sm border-2 border-black rounded transition-colors text-purple-950 dark:text-white"
               >
                 GITHUB
               </a>
@@ -115,7 +115,7 @@ export const ContactSection: React.FC = () => {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 text-center py-2 bg-[#20103C] hover:bg-vice-cyan hover:text-black font-bangers tracking-wider text-sm border-2 border-black rounded transition-colors text-white"
+                className="flex-1 text-center py-2 bg-purple-100 dark:bg-[#20103C] hover:bg-vice-cyan hover:text-black font-bangers tracking-wider text-sm border-2 border-black rounded transition-colors text-purple-950 dark:text-white"
               >
                 LINKEDIN
               </a>
@@ -127,32 +127,32 @@ export const ContactSection: React.FC = () => {
         <div className="lg:col-span-7">
           <form
             onSubmit={handleSubmit}
-            className="bg-[#130724] rounded-2xl border-4 border-black p-6 sm:p-8 shadow-[8px_8px_0px_#FF007F] relative overflow-hidden"
+            className="bg-white dark:bg-[#130724] rounded-2xl border-4 border-black p-6 sm:p-8 shadow-[8px_8px_0px_#FF007F] relative overflow-hidden transition-colors duration-300"
           >
             <div className="absolute inset-0 halftone-overlay opacity-25 pointer-events-none" />
 
             <div className="relative z-10 mb-6">
-              <h3 className="font-bangers text-3xl text-white tracking-wide">
+              <h3 className="font-bangers text-3xl text-[#15152F] dark:text-white tracking-wide transition-colors duration-300">
                 TRANSMIT MISSION BRIEFING
               </h3>
-              <p className="text-zinc-300 text-xs sm:text-sm font-sans mt-1">
+              <p className="text-[#2D2D44] dark:text-zinc-300 text-xs sm:text-sm font-sans mt-1 transition-colors duration-300">
                 Have a project idea, open-source opportunity, or engineering position? Send the signal!
               </p>
             </div>
 
             {/* Error / Success Alerts */}
             {status === 'error' && (
-              <div className="mb-5 p-3 rounded-lg bg-red-950/80 border-2 border-red-500 text-red-200 text-xs font-mono flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+              <div className="mb-5 p-3 rounded-lg bg-red-100 dark:bg-red-950/80 border-2 border-red-500 text-red-900 dark:text-red-200 text-xs font-mono flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {status === 'success' && (
-              <div className="mb-5 p-4 rounded-lg bg-emerald-950/80 border-2 border-emerald-400 text-emerald-200 text-xs font-mono flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <div className="mb-5 p-4 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 border-2 border-emerald-500 dark:border-emerald-400 text-emerald-900 dark:text-emerald-200 text-xs font-mono flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <div>
-                  <div className="font-bold text-sm text-emerald-300 font-bangers tracking-wider">
+                  <div className="font-bold text-sm text-emerald-800 dark:text-emerald-300 font-bangers tracking-wider">
                     TRANSMISSION RECEIVED 10-4!
                   </div>
                   <div>Surya will radio back to your frequency shortly.</div>
@@ -163,7 +163,7 @@ export const ContactSection: React.FC = () => {
             <div className="space-y-4 relative z-10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bangers text-vice-yellow text-sm tracking-wider uppercase mb-1">
+                  <label className="block font-bangers text-purple-900 dark:text-vice-yellow text-sm tracking-wider uppercase mb-1">
                     AGENT NAME *
                   </label>
                   <input
@@ -172,12 +172,12 @@ export const ContactSection: React.FC = () => {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Tommy Vercetti"
-                    className="w-full px-4 py-2.5 rounded-lg bg-[#090314] text-white border-2 border-black focus:border-vice-cyan focus:outline-none font-sans text-sm shadow-inner"
+                    className="w-full px-4 py-2.5 rounded-lg bg-purple-50 dark:bg-[#090314] text-[#15152F] dark:text-white border-2 border-black focus:border-vice-cyan focus:outline-none font-sans text-sm shadow-inner transition-colors duration-300"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bangers text-vice-cyan text-sm tracking-wider uppercase mb-1">
+                  <label className="block font-bangers text-sky-600 dark:text-vice-cyan text-sm tracking-wider uppercase mb-1">
                     COMM FREQUENCY (EMAIL) *
                   </label>
                   <input
@@ -186,7 +186,7 @@ export const ContactSection: React.FC = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="agent@vicecity.net"
-                    className="w-full px-4 py-2.5 rounded-lg bg-[#090314] text-white border-2 border-black focus:border-vice-pink focus:outline-none font-sans text-sm shadow-inner"
+                    className="w-full px-4 py-2.5 rounded-lg bg-purple-50 dark:bg-[#090314] text-[#15152F] dark:text-white border-2 border-black focus:border-vice-pink focus:outline-none font-sans text-sm shadow-inner transition-colors duration-300"
                   />
                 </div>
               </div>
@@ -201,12 +201,12 @@ export const ContactSection: React.FC = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   placeholder="Collaborate on next-gen AI / Full-Stack project"
-                  className="w-full px-4 py-2.5 rounded-lg bg-[#090314] text-white border-2 border-black focus:border-vice-yellow focus:outline-none font-sans text-sm shadow-inner"
+                  className="w-full px-4 py-2.5 rounded-lg bg-purple-50 dark:bg-[#090314] text-[#15152F] dark:text-white border-2 border-black focus:border-vice-yellow focus:outline-none font-sans text-sm shadow-inner transition-colors duration-300"
                 />
               </div>
 
               <div>
-                <label className="block font-bangers text-white text-sm tracking-wider uppercase mb-1">
+                <label className="block font-bangers text-[#15152F] dark:text-white text-sm tracking-wider uppercase mb-1">
                   DEBRIEF / MESSAGE DETAILS *
                 </label>
                 <textarea
@@ -215,7 +215,7 @@ export const ContactSection: React.FC = () => {
                   value={formData.message}
                   onChange={handleChange}
                   placeholder="Hey Surya, saw your open source work and portfolio. Let's discuss an engineering challenge..."
-                  className="w-full px-4 py-2.5 rounded-lg bg-[#090314] text-white border-2 border-black focus:border-vice-cyan focus:outline-none font-sans text-sm shadow-inner resize-none"
+                  className="w-full px-4 py-2.5 rounded-lg bg-purple-50 dark:bg-[#090314] text-[#15152F] dark:text-white border-2 border-black focus:border-vice-cyan focus:outline-none font-sans text-sm shadow-inner resize-none transition-colors duration-300"
                 />
               </div>
 

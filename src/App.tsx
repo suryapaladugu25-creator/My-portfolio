@@ -116,7 +116,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#07030E] text-white selection:bg-vice-pink selection:text-white font-sans antialiased overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#F5F3FF] dark:bg-[#07030E] text-[#15152F] dark:text-white selection:bg-vice-pink selection:text-white font-sans antialiased overflow-x-hidden transition-colors duration-300">
       {/* GTA VI Animated Intro Sequence */}
       <AnimatePresence>
         {showIntro && (
@@ -139,7 +139,7 @@ export const App: React.FC = () => {
       />
 
       {/* Comic Page Scanlines & Halftone Texture Overlay */}
-      <div className="fixed inset-0 pointer-events-none comic-scanlines z-[1] opacity-60" />
+      <div className="fixed inset-0 pointer-events-none comic-scanlines z-[1] opacity-40 dark:opacity-60 transition-opacity duration-300" />
 
       {/* Main Comic Sections Container */}
       <main className="relative z-10 flex flex-col gap-12 sm:gap-16 pt-4">

@@ -147,18 +147,18 @@ export const SkillsSection: React.FC = () => {
   return (
     <section id="skills" className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto z-10">
       {/* Chapter Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-[#100720]/80 p-5 rounded-lg border-2 border-vice-cyan shadow-[6px_6px_0px_#FF007F]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white/95 dark:bg-[#100720]/80 p-5 rounded-lg border-2 border-vice-cyan shadow-[6px_6px_0px_#FF007F] transition-colors duration-300">
         <div>
           <div className="flex items-center gap-2">
             <span className="bg-vice-pink text-black font-bangers text-lg px-2.5 py-0.5 border-2 border-black">
               ISSUE #02
             </span>
-            <span className="text-vice-yellow font-mono text-sm uppercase tracking-widest font-bold">
+            <span className="text-amber-600 dark:text-vice-yellow font-mono text-sm uppercase tracking-widest font-bold">
               // TECH ARSENAL & FIREPOWER
             </span>
           </div>
-          <h2 className="text-4xl sm:text-6xl font-bangers tracking-wider text-white mt-1">
-            WEAPONS OF <span className="text-vice-yellow">MASS CREATION</span>
+          <h2 className="text-4xl sm:text-6xl font-bangers tracking-wider text-[#15152F] dark:text-white mt-1 transition-colors duration-300">
+            WEAPONS OF <span className="text-amber-500 dark:text-vice-yellow">MASS CREATION</span>
           </h2>
         </div>
 
@@ -178,7 +178,7 @@ export const SkillsSection: React.FC = () => {
               </p>
             </motion.div>
           ) : (
-            <div className="bg-[#190C34] text-zinc-400 p-3.5 rounded-xl border-2 border-dashed border-zinc-700 text-center font-mono text-xs">
+            <div className="bg-purple-50 dark:bg-[#190C34] text-purple-800 dark:text-zinc-400 p-3.5 rounded-xl border-2 border-dashed border-purple-300 dark:border-zinc-700 text-center font-mono text-xs transition-colors duration-300">
               ⚡ HOVER OVER ANY WEAPON TO UNLOCK SURYA'S COMBAT NOTE
             </div>
           )}
@@ -194,7 +194,7 @@ export const SkillsSection: React.FC = () => {
             className={`font-bangers text-lg tracking-wider px-4 py-1.5 border-2 border-black transition-all ${
               activeTab === cat
                 ? 'bg-vice-yellow text-black shadow-[4px_4px_0px_#FF007F] -translate-y-0.5'
-                : 'bg-[#150A2A] text-zinc-300 hover:text-white hover:bg-vice-pink hover:text-black shadow-[3px_3px_0px_#000]'
+                : 'bg-white dark:bg-[#150A2A] text-purple-950 dark:text-zinc-300 hover:text-black hover:bg-vice-pink shadow-[3px_3px_0px_#000]'
             }`}
           >
             {cat.toUpperCase()}
@@ -215,7 +215,7 @@ export const SkillsSection: React.FC = () => {
               whileHover={{ y: -6, scale: 1.02 }}
               onMouseEnter={() => setHoveredSkill(skill)}
               onMouseLeave={() => setHoveredSkill(null)}
-              className="bg-[#120822] rounded-xl border-3 border-black p-5 relative overflow-hidden group cursor-pointer transition-shadow"
+              className="bg-white dark:bg-[#120822] rounded-xl border-3 border-black p-5 relative overflow-hidden group cursor-pointer transition-all duration-300"
               style={{
                 boxShadow: `5px 5px 0px ${skill.glowColor}`,
               }}
@@ -225,21 +225,21 @@ export const SkillsSection: React.FC = () => {
 
               {/* Power Level Badge */}
               <div className="flex justify-between items-start mb-3">
-                <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 rounded bg-[#090314] text-zinc-300 border border-zinc-800">
+                <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 rounded bg-purple-100 dark:bg-[#090314] text-purple-900 dark:text-zinc-300 border border-purple-200 dark:border-zinc-800 transition-colors duration-300">
                   {skill.category}
                 </span>
-                <span className="font-bangers text-sm tracking-wider text-vice-yellow bg-black/60 px-2 py-0.5 rounded border border-vice-yellow/50">
+                <span className="font-bangers text-sm tracking-wider text-purple-950 dark:text-vice-yellow bg-yellow-100 dark:bg-black/60 px-2 py-0.5 rounded border border-yellow-400 dark:border-vice-yellow/50 transition-colors duration-300">
                   {skill.level}
                 </span>
               </div>
 
               {/* Skill Name & Header */}
-              <h3 className="font-bangers text-2xl text-white group-hover:text-vice-cyan transition-colors mb-2 tracking-wide">
+              <h3 className="font-bangers text-2xl text-[#15152F] dark:text-white group-hover:text-purple-600 dark:group-hover:text-vice-cyan transition-colors mb-2 tracking-wide">
                 {skill.name}
               </h3>
 
               {/* Mobile / Small screen speech snippet */}
-              <p className="block lg:hidden text-zinc-300 text-xs italic mb-3 font-sans">
+              <p className="block lg:hidden text-purple-900 dark:text-zinc-300 text-xs italic mb-3 font-sans transition-colors duration-300">
                 {skill.comicQuote}
               </p>
 
@@ -248,7 +248,7 @@ export const SkillsSection: React.FC = () => {
                 {skill.tags.map((t) => (
                   <span
                     key={t}
-                    className="font-mono text-[11px] px-2 py-0.5 rounded bg-[#1B0F33] text-zinc-300 border border-vice-purple/30 group-hover:border-vice-cyan/50 transition-colors"
+                    className="font-mono text-[11px] px-2 py-0.5 rounded bg-purple-50 dark:bg-[#1B0F33] text-purple-900 dark:text-zinc-300 border border-purple-200 dark:border-vice-purple/30 group-hover:border-purple-400 dark:group-hover:border-vice-cyan/50 transition-colors"
                   >
                     #{t}
                   </span>

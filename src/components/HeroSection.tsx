@@ -45,15 +45,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <span className="font-bangers tracking-wider text-sm sm:text-base px-3 py-1 bg-vice-pink text-black border-2 border-black shadow-[3px_3px_0px_#00F0FF] uppercase">
               ★ ISSUE #01: THE ARCHITECT
             </span>
-            <span className="flex items-center gap-1 font-mono text-xs text-vice-yellow bg-[#120822]/90 border border-vice-yellow/40 px-3 py-1 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span className="flex items-center gap-1 font-mono text-xs text-purple-900 dark:text-vice-yellow bg-white/90 dark:bg-[#120822]/90 border border-purple-300 dark:border-vice-yellow/40 px-3 py-1 rounded-full shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping"></span>
               STATUS: READY TO DEPLOY
             </span>
           </div>
 
           {/* Main Title: GTA VI Vice City Comic Styled */}
           <h1 className="text-5xl sm:text-7xl xl:text-8xl font-bangers italic tracking-wider leading-none select-none filter drop-shadow-[0_0_24px_rgba(168,85,247,0.5)]">
-            <span className="text-[#FFFFFF] drop-shadow-[0_4px_12px_rgba(168,85,247,0.6)]">
+            <span className="text-[#15152F] dark:text-[#FFFFFF] drop-shadow-[0_4px_12px_rgba(168,85,247,0.5)] transition-colors duration-300">
               SURYA
             </span>
             <br />
@@ -63,15 +63,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </h1>
 
           {/* Subtitle Punchline */}
-          <p className="mt-4 text-xl sm:text-2xl font-bangers tracking-wide text-vice-cyan uppercase">
+          <p className="mt-4 text-xl sm:text-2xl font-bangers tracking-wide text-sky-600 dark:text-vice-cyan uppercase transition-colors duration-300">
             ENGINEERING THE FUTURE, ONE COMMIT AT A TIME.
           </p>
 
           {/* Descriptive Bio in comic frame */}
-          <div className="mt-4 p-4 rounded-lg bg-[#0F081E]/85 border-2 border-black shadow-[5px_5px_0px_#9D00FF] backdrop-blur-sm max-w-xl">
-            <p className="text-zinc-200 text-sm sm:text-base leading-relaxed font-sans">
-              B.Tech Computer Science student at <strong className="text-vice-yellow">Newton School of Technology</strong>.
-              Open-source contributor with <strong className="text-vice-pink">Team VYPR</strong> (10+ PRs merged).
+          <div className="mt-4 p-4 rounded-lg bg-white/95 dark:bg-[#0F081E]/85 border-2 border-black shadow-[5px_5px_0px_#9D00FF] backdrop-blur-sm max-w-xl transition-colors duration-300">
+            <p className="text-[#2D2D44] dark:text-zinc-200 text-sm sm:text-base leading-relaxed font-sans transition-colors duration-300">
+              B.Tech Computer Science student at <strong className="text-amber-600 dark:text-vice-yellow font-bold">Newton School of Technology</strong>.
+              Open-source contributor with <strong className="text-vice-pink font-bold">Team VYPR</strong> (10+ PRs merged).
               Channeling the relentless precision of a state-level cricketer, competitive tennis player, and late-night guitar riffs into high-octane web engineering.
             </p>
           </div>
@@ -88,7 +88,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             <button
               onClick={onContactClick}
-              className="font-bangers text-xl sm:text-2xl tracking-widest px-6 py-3 bg-[#170930] hover:bg-vice-cyan hover:text-black text-vice-cyan border-3 border-black shadow-[5px_5px_0px_#FF007F] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-2 uppercase"
+              className="font-bangers text-xl sm:text-2xl tracking-widest px-6 py-3 bg-white dark:bg-[#170930] hover:bg-vice-cyan hover:text-black text-purple-950 dark:text-vice-cyan border-3 border-black shadow-[5px_5px_0px_#FF007F] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-2 uppercase"
             >
               <Terminal className="w-5 h-5" />
               RADIO HQ
@@ -101,7 +101,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               href="https://github.com"
               target="_blank"
               rel="noreferrer"
-              className="p-2.5 rounded-md bg-[#120725] border-2 border-black shadow-[3px_3px_0px_#00F0FF] hover:bg-vice-pink hover:text-black text-white transition-all"
+              className="p-2.5 rounded-md bg-white dark:bg-[#120725] border-2 border-black shadow-[3px_3px_0px_#00F0FF] hover:bg-vice-pink hover:text-black text-[#15152F] dark:text-white transition-all"
               title="GitHub Profile"
             >
               <GithubIcon className="w-5 h-5" />
@@ -110,20 +110,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               href="https://linkedin.com"
               target="_blank"
               rel="noreferrer"
-              className="p-2.5 rounded-md bg-[#120725] border-2 border-black shadow-[3px_3px_0px_#FF007F] hover:bg-vice-cyan hover:text-black text-white transition-all"
+              className="p-2.5 rounded-md bg-white dark:bg-[#120725] border-2 border-black shadow-[3px_3px_0px_#FF007F] hover:bg-vice-cyan hover:text-black text-[#15152F] dark:text-white transition-all"
               title="LinkedIn Profile"
             >
               <LinkedinIcon className="w-5 h-5" />
             </a>
             <a
               href="mailto:surya@example.com"
-              className="p-2.5 rounded-md bg-[#120725] border-2 border-black shadow-[3px_3px_0px_#FFDE59] hover:bg-vice-yellow hover:text-black text-white transition-all"
+              className="p-2.5 rounded-md bg-white dark:bg-[#120725] border-2 border-black shadow-[3px_3px_0px_#FFDE59] hover:bg-vice-yellow hover:text-black text-[#15152F] dark:text-white transition-all"
               title="Direct Email"
             >
               <Mail className="w-5 h-5" />
             </a>
 
-            <div className="ml-3 hidden sm:flex items-center gap-2 font-mono text-xs text-zinc-400">
+            <div className="ml-3 hidden sm:flex items-center gap-2 font-mono text-xs text-purple-900 dark:text-zinc-400">
               <span className="w-2 h-2 rounded-full bg-vice-cyan"></span>
               CLICK CHARACTER TO CYCLE SPEECH
             </div>
@@ -152,7 +152,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
         <button
           onClick={onExploreMissions}
-          className="text-zinc-400 hover:text-vice-yellow transition-colors flex flex-col items-center gap-1 font-bangers tracking-widest text-sm"
+          className="text-purple-900 dark:text-zinc-400 hover:text-vice-pink dark:hover:text-vice-yellow transition-colors flex flex-col items-center gap-1 font-bangers tracking-widest text-sm"
         >
           <span>SCROLL DOWN TO ADVANCE COMIC</span>
           <ArrowDown className="w-5 h-5 animate-bounce text-vice-pink" />

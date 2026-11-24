@@ -12,8 +12,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+
+  <!-- Anti-flash script to restore theme before first paint -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('surya-theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        if (saved === 'light' || (!saved && prefersLight)) {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
-<body class="bg-vice-dark text-white overflow-x-hidden selection:bg-vice-pink selection:text-white font-sans antialiased">
+<body class="bg-[#F5F3FF] text-[#15152F] dark:bg-vice-dark dark:text-white transition-colors duration-300 overflow-x-hidden selection:bg-vice-pink selection:text-white font-sans antialiased">
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

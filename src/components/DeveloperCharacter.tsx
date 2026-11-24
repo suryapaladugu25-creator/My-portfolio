@@ -14,14 +14,14 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
 }) => {
   const shouldReduceMotion = useReducedMotion();
 
-  // Natural waving rotation keyframes from the elbow joint (10-12° total sweep with resting pause)
+  // Natural waving rotation from the shoulder joint (8–10° subtle human greeting arc with resting pause)
   const waveAnimation = shouldReduceMotion ? { rotate: 0 } : {
-    rotate: [0, -6, 6, -5, 4, 0, 0],
+    rotate: [0, -5, 5, -4, 3, 0, 0],
     transition: {
-      duration: 2.0,
+      duration: 2.2,
       repeat: Infinity,
       ease: "easeInOut",
-      times: [0, 0.2, 0.42, 0.62, 0.78, 0.88, 1.0]
+      times: [0, 0.22, 0.44, 0.64, 0.8, 0.9, 1.0]
     }
   };
 
@@ -60,7 +60,7 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
         </motion.div>
       )}
 
-      {/* SVG Container: Layering Chair, Character Avatar & Coding Station */}
+      {/* SVG Container: Layering Chair, Seamless Character Avatar & Coding Station */}
       <svg
         viewBox="0 0 500 520"
         className="w-full h-auto filter drop-shadow-[0_16px_35px_rgba(0,0,0,0.85)]"
@@ -111,31 +111,21 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
           </text>
         </g>
 
-        {/* ── Layer 2: Premium Personalized Surya Developer Avatar ── */}
+        {/* ── Layer 2: Seamlessly Layered Surya Developer Avatar ── */}
         <g>
           {/* Neon rim ambient aura directly behind avatar */}
           <ellipse cx="250" cy="260" rx="160" ry="170" fill="#00F0FF" opacity="0.12" filter="blur(20px)" />
           <ellipse cx="270" cy="240" rx="140" ry="150" fill="#FF007F" opacity="0.1" filter="blur(25px)" />
 
-          {/* 2A. Stationary Body, Head, Wavy Hair, Hoodie & Torso */}
-          <image
-            href="/surya-avatar-body.png"
-            x="40"
-            y="42"
-            width="420"
-            height="420"
-            preserveAspectRatio="xMidYMid meet"
-            filter="url(#avatarNeonRim)"
-          />
-
-          {/* 2B. Continuous Waving Limb: Hand + Wrist + Forearm Sleeve All in One Piece */}
-          {/* Anatomical pivot point at the elbow joint: x=126px, y=298px */}
+          {/* 2A. Waving Arm Layer (Rendered UNDER the torso layer) */}
+          {/* Primary rotation pivot at anatomical shoulder joint: x=153px, y=286px */}
+          {/* The arm base is extended underneath the torso so no cut or gap is ever exposed */}
           <motion.g
             animate={waveAnimation}
             style={{ 
-              originX: "126px", 
-              originY: "298px",
-              transformOrigin: "126px 298px"
+              originX: "153px", 
+              originY: "286px",
+              transformOrigin: "153px 286px"
             }}
           >
             <image
@@ -149,6 +139,18 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
             />
           </motion.g>
 
+          {/* 2B. Stationary Torso Layer (Rendered ON TOP of the arm base) */}
+          {/* 100% intact chest, head, wavy hair, face, and natural shoulder contour */}
+          <image
+            href="/surya-avatar-body.png"
+            x="40"
+            y="42"
+            width="420"
+            height="420"
+            preserveAspectRatio="xMidYMid meet"
+            filter="url(#avatarNeonRim)"
+          />
+
           {/* Glowing "SP" Monogram Emblem Highlight on Hoodie Chest */}
           <g transform="translate(205, 305)" filter="url(#spNeonGlow)">
             <rect x="0" y="0" width="34" height="20" rx="5" fill="#080410" stroke="#00F0FF" strokeWidth="2" opacity="0.9" />
@@ -159,7 +161,6 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
         </g>
 
         {/* ── Layer 3: Foreground Coding Monitor & Futuristic Cyberpunk Desk ── */}
-        {/* Anchors the elbow naturally behind the desk and monitor */}
         <g>
           {/* Cyberpunk Desk Surface */}
           <polygon points="25,445 475,445 500,520 0,520" fill="#090514" stroke="#000" strokeWidth="6" />

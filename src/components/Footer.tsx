@@ -13,8 +13,8 @@ export const Footer: React.FC<FooterProps> = ({ onBackToTop }) => {
         {/* Left Branding */}
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2">
-            <span className="font-bangers text-2xl text-white tracking-wider">
-              SURYA<span className="text-vice-pink">.PALADUGU</span>
+            <span className="font-bangers italic text-2xl text-[#FFFFFF] tracking-wider drop-shadow-[0_0_12px_rgba(168,85,247,0.5)]">
+              SURYA<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#2563EB]">.PALADUGU</span>
             </span>
             <span className="font-mono text-[10px] px-2 py-0.5 bg-vice-cyan text-black font-bold border border-black">
               GTA VI EDITION
@@ -53,3 +53,4 @@ export const Footer: React.FC<FooterProps> = ({ onBackToTop }) => {
     </footer>
   );
 };
+

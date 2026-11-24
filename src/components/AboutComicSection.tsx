@@ -176,3 +176,4 @@ export const AboutComicSection: React.FC = () => {
     </section>
   );
 };
+

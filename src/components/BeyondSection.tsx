@@ -174,3 +174,4 @@ export const BeyondSection: React.FC = () => {
     </section>
   );
 };
+

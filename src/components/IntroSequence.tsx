@@ -200,10 +200,12 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300, delay: 0.25 }}
-              className="relative z-10 font-bangers text-6xl md:text-8xl lg:text-9xl text-white tracking-wider comic-stroke uppercase filter drop-shadow-[0_6px_0_#FF007F]"
+              className="relative z-10 font-bangers italic text-6xl md:text-8xl lg:text-9xl tracking-wider comic-stroke uppercase filter drop-shadow-[0_0_28px_rgba(168,85,247,0.55)]"
             >
-              <span className="text-white hover:text-vice-yellow transition-colors">SURYA </span>
-              <span className="text-vice-pink hover:text-vice-cyan transition-colors">PALADUGU</span>
+              <span className="text-[#FFFFFF] drop-shadow-[0_4px_16px_rgba(168,85,247,0.6)]">SURYA </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#2563EB] drop-shadow-[0_0_22px_rgba(168,85,247,0.7)]">
+                PALADUGU
+              </span>
             </motion.h1>
 
             {/* Subtitle speech banner */}
@@ -239,3 +241,4 @@ export const IntroSequence: React.FC<IntroSequenceProps> = ({ onComplete }) => {
     </motion.div>
   );
 };
+

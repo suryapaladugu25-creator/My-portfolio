@@ -144,3 +144,4 @@ export const HacktoberfestSection: React.FC = () => {
     </section>
   );
 };
+

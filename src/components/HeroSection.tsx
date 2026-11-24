@@ -52,9 +52,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           {/* Main Title: GTA VI Vice City Comic Styled */}
-          <h1 className="text-5xl sm:text-7xl xl:text-8xl font-bangers tracking-wider leading-none text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
-            SURYA <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-vice-pink via-vice-yellow to-vice-cyan comic-stroke">
+          <h1 className="text-5xl sm:text-7xl xl:text-8xl font-bangers italic tracking-wider leading-none select-none filter drop-shadow-[0_0_24px_rgba(168,85,247,0.5)]">
+            <span className="text-[#FFFFFF] drop-shadow-[0_4px_12px_rgba(168,85,247,0.6)]">
+              SURYA
+            </span>
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#2563EB] drop-shadow-[0_0_20px_rgba(168,85,247,0.65)] comic-stroke">
               PALADUGU
             </span>
           </h1>

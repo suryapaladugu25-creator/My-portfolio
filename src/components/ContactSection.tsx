@@ -82,6 +82,7 @@ export const ContactSection: React.FC = () => {
           <div className="w-full flex justify-center">
             <DeveloperCharacter 
               isWaving={true}
+              showHiBubble={false}
               actionSpeech="LET'S BUILD SOMETHING LEGENDARY! 🚀" 
             />
           </div>

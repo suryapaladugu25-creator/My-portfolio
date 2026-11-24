@@ -12,26 +12,23 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
   actionSpeech,
   showHiBubble = true
 }) => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const shouldReduceMotion = useReducedMotion();
 
-  // Gentle reaction to cursor movement (subtle 3D parallax tracking)
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (shouldReduceMotion) return;
-      const { innerWidth, innerHeight } = window;
-      const x = (e.clientX / innerWidth - 0.5) * 12;
-      const y = (e.clientY / innerHeight - 0.5) * 8;
-      setMousePos({ x, y });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [shouldReduceMotion]);
+  // Waving rotation keyframes with gentle natural pauses between waves
+  const waveAnimation = shouldReduceMotion ? { rotate: 0 } : {
+    rotate: [0, -14, 14, -12, 10, 0, 0],
+    transition: {
+      duration: 1.8,
+      repeat: Infinity,
+      ease: "easeInOut",
+      times: [0, 0.18, 0.38, 0.58, 0.74, 0.86, 1.0]
+    }
+  };
 
   return (
     <div className="relative w-full max-w-[420px] md:max-w-[490px] flex flex-col items-center select-none">
       
-      {/* Floating "HI!" Speech Bubble near the waving hand */}
+      {/* Floating "HI!" Speech Bubble directly above the waving hand (Left Side) */}
       {showHiBubble && (
         <motion.div
           initial={{ scale: 0, opacity: 0, y: 10 }}
@@ -42,7 +39,7 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
             damping: 18, 
             delay: 0.25 
           }}
-          className="absolute top-1 md:top-2 right-2 md:right-4 z-40 bg-white text-black px-3.5 py-1.5 rounded-full border-3 border-black shadow-[3px_3px_0px_#00F0FF] font-bangers text-xl tracking-wider rotate-6 flex items-center gap-1.5"
+          className="absolute top-1 md:top-2 left-2 md:left-4 z-40 bg-white text-black px-3.5 py-1.5 rounded-full border-3 border-black shadow-[3px_3px_0px_#00F0FF] font-bangers text-xl tracking-wider -rotate-6 flex items-center gap-1.5 pointer-events-none"
         >
           <span>HI!</span>
           <span className="text-base animate-pulse">👋</span>
@@ -71,8 +68,8 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
         <defs>
           {/* Subtle Vice City Neon Rim Glow Filters */}
           <filter id="avatarNeonRim" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#00F0FF" floodOpacity="0.45" />
-            <feDropShadow dx="0" dy="0" stdDeviation="14" floodColor="#FF007F" floodOpacity="0.35" />
+            <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#00F0FF" floodOpacity="0.4" />
+            <feDropShadow dx="0" dy="0" stdDeviation="14" floodColor="#FF007F" floodOpacity="0.3" />
           </filter>
 
           <filter id="spNeonGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -114,25 +111,15 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
           </text>
         </g>
 
-        {/* ── Layer 2: Premium Personalized Surya Developer Avatar (Transparent PNG) ── */}
-        <motion.g
-          animate={shouldReduceMotion ? {} : {
-            x: mousePos.x * 0.35,
-            y: [0, -3.5, 0],
-          }}
-          transition={{
-            y: { duration: 3.2, repeat: Infinity, ease: "easeInOut" },
-            x: { ease: "easeOut", duration: 0.25 }
-          }}
-          style={{ originX: "250px", originY: "300px" }}
-        >
+        {/* ── Layer 2: Premium Personalized Surya Developer Avatar (With Naturally Waving Hand) ── */}
+        <g>
           {/* Neon rim ambient aura directly behind avatar */}
           <ellipse cx="250" cy="260" rx="160" ry="170" fill="#00F0FF" opacity="0.12" filter="blur(20px)" />
           <ellipse cx="270" cy="240" rx="140" ry="150" fill="#FF007F" opacity="0.1" filter="blur(25px)" />
 
-          {/* Transparent PNG Character Cutout */}
+          {/* 2A. Stationary Body, Head, Hair & Hoodie (Stationary, zero jitter) */}
           <image
-            href="/surya-avatar.png"
+            href="/surya-avatar-body.png"
             x="40"
             y="42"
             width="420"
@@ -141,14 +128,44 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
             filter="url(#avatarNeonRim)"
           />
 
-          {/* Subtle Glowing "SP" Monogram Emblem Highlight on Hoodie Chest */}
+          {/* 2B. Waving Hand & Forearm (Rotates around exact wrist pivot: x=131px, y=246px) */}
+          <motion.g
+            animate={waveAnimation}
+            style={{ 
+              originX: "131px", 
+              originY: "246px",
+              transformOrigin: "131px 246px"
+            }}
+          >
+            <image
+              href="/surya-avatar-hand.png"
+              x="40"
+              y="42"
+              width="420"
+              height="420"
+              preserveAspectRatio="xMidYMid meet"
+              filter="url(#avatarNeonRim)"
+            />
+          </motion.g>
+
+          {/* 2C. Stationary Sleeve Cuff Rim (Stationary, seamlessly masks wrist pivot) */}
+          <image
+            href="/surya-avatar-cuff.png"
+            x="40"
+            y="42"
+            width="420"
+            height="420"
+            preserveAspectRatio="xMidYMid meet"
+          />
+
+          {/* Glowing "SP" Monogram Emblem Highlight on Hoodie Chest */}
           <g transform="translate(205, 305)" filter="url(#spNeonGlow)">
             <rect x="0" y="0" width="34" height="20" rx="5" fill="#080410" stroke="#00F0FF" strokeWidth="2" opacity="0.9" />
             <text x="17" y="15" fill="#FFF" fontFamily="Bangers" fontSize="14" textAnchor="middle" letterSpacing="1">
               <tspan fill="#00F0FF">S</tspan><tspan fill="#FF007F">P</tspan>
             </text>
           </g>
-        </motion.g>
+        </g>
 
         {/* ── Layer 3: Foreground Coding Monitor & Futuristic Cyberpunk Desk ── */}
         <g>

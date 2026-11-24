@@ -14,14 +14,14 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
 }) => {
   const shouldReduceMotion = useReducedMotion();
 
-  // Waving rotation keyframes with gentle natural pauses between waves
+  // Natural waving rotation keyframes from the elbow joint (10-12° total sweep with resting pause)
   const waveAnimation = shouldReduceMotion ? { rotate: 0 } : {
-    rotate: [0, -14, 14, -12, 10, 0, 0],
+    rotate: [0, -6, 6, -5, 4, 0, 0],
     transition: {
-      duration: 1.8,
+      duration: 2.0,
       repeat: Infinity,
       ease: "easeInOut",
-      times: [0, 0.18, 0.38, 0.58, 0.74, 0.86, 1.0]
+      times: [0, 0.2, 0.42, 0.62, 0.78, 0.88, 1.0]
     }
   };
 
@@ -111,13 +111,13 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
           </text>
         </g>
 
-        {/* ── Layer 2: Premium Personalized Surya Developer Avatar (With Naturally Waving Hand) ── */}
+        {/* ── Layer 2: Premium Personalized Surya Developer Avatar ── */}
         <g>
           {/* Neon rim ambient aura directly behind avatar */}
           <ellipse cx="250" cy="260" rx="160" ry="170" fill="#00F0FF" opacity="0.12" filter="blur(20px)" />
           <ellipse cx="270" cy="240" rx="140" ry="150" fill="#FF007F" opacity="0.1" filter="blur(25px)" />
 
-          {/* 2A. Stationary Body, Head, Hair & Hoodie (Stationary, zero jitter) */}
+          {/* 2A. Stationary Body, Head, Wavy Hair, Hoodie & Torso */}
           <image
             href="/surya-avatar-body.png"
             x="40"
@@ -128,17 +128,18 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
             filter="url(#avatarNeonRim)"
           />
 
-          {/* 2B. Waving Hand & Forearm (Rotates around exact wrist pivot: x=131px, y=246px) */}
+          {/* 2B. Continuous Waving Limb: Hand + Wrist + Forearm Sleeve All in One Piece */}
+          {/* Anatomical pivot point at the elbow joint: x=126px, y=298px */}
           <motion.g
             animate={waveAnimation}
             style={{ 
-              originX: "131px", 
-              originY: "246px",
-              transformOrigin: "131px 246px"
+              originX: "126px", 
+              originY: "298px",
+              transformOrigin: "126px 298px"
             }}
           >
             <image
-              href="/surya-avatar-hand.png"
+              href="/surya-avatar-arm.png"
               x="40"
               y="42"
               width="420"
@@ -147,16 +148,6 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
               filter="url(#avatarNeonRim)"
             />
           </motion.g>
-
-          {/* 2C. Stationary Sleeve Cuff Rim (Stationary, seamlessly masks wrist pivot) */}
-          <image
-            href="/surya-avatar-cuff.png"
-            x="40"
-            y="42"
-            width="420"
-            height="420"
-            preserveAspectRatio="xMidYMid meet"
-          />
 
           {/* Glowing "SP" Monogram Emblem Highlight on Hoodie Chest */}
           <g transform="translate(205, 305)" filter="url(#spNeonGlow)">
@@ -168,6 +159,7 @@ export const DeveloperCharacter: React.FC<DeveloperCharacterProps> = ({
         </g>
 
         {/* ── Layer 3: Foreground Coding Monitor & Futuristic Cyberpunk Desk ── */}
+        {/* Anchors the elbow naturally behind the desk and monitor */}
         <g>
           {/* Cyberpunk Desk Surface */}
           <polygon points="25,445 475,445 500,520 0,520" fill="#090514" stroke="#000" strokeWidth="6" />
